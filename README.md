@@ -8,10 +8,10 @@
 - `data/raw/` — 작업용 원본과 로컬 설정(git 제외). `base.txt`(원본 주소), `internal-terms.txt`(공개 금지 문구), `site/`(원본 미러).
 - `scripts/pull` — 원본 → raw → 정본. `--from-raw` 는 네트워크 없이 정본만 재생성.
 - `scripts/mirror` — 원본 논문 페이지와 그림을 `data/raw/site/` 에 통째로 보관.
-- `scripts/build` — 정본 → `site/index.html` (단일 파일, 외부 자원 없음). `--check` 는 최신 여부만.
+- `scripts/build` — 정본 → `site/catalog.fragment.html`(Hugo 가 감싸는 조각, 다크 모드는 테마 변수로 따라옴) + `site/index.html`(미리보기). 노트가 있는 논문엔 Note → 링크. `--check` 는 최신 여부만.
 - `scripts/check` — 검증기 전부(스키마 + 공개 원칙 + 사이트 최신 + unittest). `.harness/verify` 가 이것을 부른다.
 - `notes/` — 논문 노트 원고(Hugo front matter). 검증 통과분만 `scripts/export` 가 `../athena-web` 으로 내보낸다.
-- `scripts/export` — 카탈로그(`site/index.html`)와 노트를 athena-web 에 한 방향으로 복사. 내보내기 전에 `scripts/check` 를 돌린다.
+- `scripts/export` — 카탈로그 조각과 노트를 athena-web 에 한 방향으로 복사. 내보내기 전에 `scripts/check` 를 돌린다.
 - `.harness/` — 하네스 계약 파일. 밤 작업은 오프라인 리프만(요약 재작성·학회 정규화).
 
 ## 규칙

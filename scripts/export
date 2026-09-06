@@ -4,7 +4,7 @@
   scripts/export [--to ../athena-web] [--dry-run]
 
 보내는 것
-  site/index.html   → <web>/static/papers/index.html   (카탈로그)
+  site/catalog.fragment.html → <web>/assets/catalog/catalog.fragment.html   (카탈로그 조각 — Hugo 의 layouts/papers/list.html 이 감싼다)
   notes/*.md        → <web>/content/notes/<slug>.md     (논문 노트. 대상 폴더를 원고와 같게 맞춘다 — 원고에 없는 노트는 지운다)
 내보내기 전에 scripts/check 를 돌리고, 실패하면 아무것도 쓰지 않는다. 커밋은 하지 않는다 — 웹 레포에서 사람이 한다.
 """
@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import papers as P  # noqa: E402
 
 NOTES = P.ROOT / "notes"
-CATALOG = P.ROOT / "site" / "index.html"
+CATALOG = P.ROOT / "site" / "catalog.fragment.html"
+LEGACY = "static/papers/index.html"  # 예전 독립 파일 — 있으면 지운다 (Hugo 의 /papers/ 와 충돌)
 
 
 def main(argv=None) -> int:
@@ -36,7 +37,8 @@ def main(argv=None) -> int:
     if r.returncode != 0:
         print(r.stdout)
         sys.exit("scripts/check 실패 — 내보내지 않는다")
-    plan = [(CATALOG, web / "static" / "papers" / "index.html")]
+    plan = [(CATALOG, web / "assets" / "catalog" / "catalog.fragment.html")]
+    legacy = web / LEGACY
     src_notes = sorted(p for p in NOTES.glob("*.md") if p.name.lower() != "readme.md" and not p.name.startswith("_")) if NOTES.exists() else []
     dst_dir = web / "content" / "notes"
     for n in src_notes:
@@ -47,6 +49,8 @@ def main(argv=None) -> int:
         print("  %s → %s" % (s.relative_to(P.ROOT), d.relative_to(web)))
     for p in stale:
         print("  삭제 %s (원고에 없음)" % p.relative_to(web))
+    if legacy.exists():
+        print("  삭제 %s (독립 카탈로그 — Hugo 페이지로 대체)" % LEGACY)
     if a.dry_run:
         print("dry-run: 카탈로그 1 · 노트 %d · 삭제 %d" % (len(src_notes), len(stale)))
         return 0
@@ -55,6 +59,8 @@ def main(argv=None) -> int:
         shutil.copyfile(s, d)
     for p in stale:
         p.unlink()
+    if legacy.exists():
+        legacy.unlink()
     print("export: 카탈로그 1 · 노트 %d · 삭제 %d → %s" % (len(src_notes), len(stale), web))
     return 0
 

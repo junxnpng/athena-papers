@@ -131,8 +131,17 @@ class BuildTest(unittest.TestCase):
         self.assertIn("Y &lt;b&gt;제목&lt;/b&gt;", h1)
         self.assertIn('data-year="2024"', h1)
         self.assertIn("source link pending", h1)
-        self.assertIn('<meta charset="utf-8">', h1)  # 독립 파일로 서빙 — 없으면 한글이 깨진다 (실측)
+        self.assertNotIn("<h1", h1)  # 조각 — 제목은 Hugo 가 그린다
+        self.assertIn('<meta charset="utf-8">', B.render_standalone(data))  # 미리보기 문서 — 없으면 한글이 깨진다 (실측)
         self.assertNotIn("<script src", h1)  # 외부 자원 없음
+
+    def test_note_link_when_note_exists(self):
+        B = _load_build()
+        data = P.build_public(raw(raw_paper()))
+        h = B.render(data, {"kv-cache/x": "/notes/x/"})
+        self.assertIn('href="/notes/x/"', h)
+        self.assertIn("Note →", h)
+        self.assertNotIn("Note →", B.render(data, {}))
 
     def test_check_detects_stale_site(self):
         B = _load_build()
@@ -140,10 +149,11 @@ class BuildTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             dp, out = Path(d) / "p.json", Path(d) / "index.html"
             P.dump(data, dp)
-            self.assertEqual(B.main(["--data", str(dp), "--out", str(out)]), 0)
-            self.assertEqual(B.main(["--check", "--data", str(dp), "--out", str(out)]), 0)
+            frag = Path(d) / "frag.html"
+            self.assertEqual(B.main(["--data", str(dp), "--out", str(out), "--fragment", str(frag)]), 0)
+            self.assertEqual(B.main(["--check", "--data", str(dp), "--out", str(out), "--fragment", str(frag)]), 0)
             out.write_text(out.read_text(encoding="utf-8") + "<!-- 손으로 고침 -->", encoding="utf-8")
-            self.assertEqual(B.main(["--check", "--data", str(dp), "--out", str(out)]), 1)
+            self.assertEqual(B.main(["--check", "--data", str(dp), "--out", str(out), "--fragment", str(frag)]), 1)
 
 
 if __name__ == "__main__":

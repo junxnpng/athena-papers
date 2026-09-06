@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""data/papers.json → site/index.html (단일 파일, 외부 자원 없음). 결정론적 — 같은 데이터면 같은 HTML.
+"""data/papers.json → site/catalog.fragment.html (Hugo 페이지 안에 들어가는 조각) + site/index.html (미리보기용 완전한 문서). 결정론적.
+노트(notes/*.md)가 있는 논문에는 Note → 링크가 붙는다. 색은 PaperMod 변수에 기대므로 다크 모드가 따라온다.
 
   scripts/build            생성
   scripts/build --check    생성 결과가 site/index.html 과 같은지만 검사 (I3: 사이트는 파생물, 손으로 고치지 않는다)
@@ -23,59 +24,50 @@ HUB_EN = {"concept": "Concepts & Surveys", "model": "Models", "runtime": "Servin
 KIND_EN = {"전문 번역": "full translation", "핵심 발췌 번역": "key excerpts", "정독·분석": "close reading", "해설": "explainer", "기타": "note"}
 
 CSS = """
-:root{--bg:#f7f7f5;--fg:#1b1b1b;--mut:#6b6b66;--card:#fff;--line:#e3e2dd;--acc:#1f5fbf;--chip:#eef0f4;--chipfg:#333;--badge:#ffe9b3;--badgefg:#6b4b00;--hl:#fff7cf}
-@media (prefers-color-scheme:dark){:root{--bg:#141517;--fg:#e8e6e1;--mut:#9a9a94;--card:#1d1f23;--line:#2c2f35;--acc:#7fb0ff;--chip:#272a31;--chipfg:#d6d6d0;--badge:#4a3a10;--badgefg:#ffd980;--hl:#3a3410}}
-*{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Segoe UI",Roboto,sans-serif}
-a{color:var(--acc)}
-.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
-header.top{padding:40px 0 16px}
-header.top h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}
-header.top p{margin:0;color:var(--mut)}
-.tally{margin-top:10px;font-size:14px;color:var(--mut)}.tally b{color:var(--fg)}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:24px}
-.bar .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.bar input[type=search]{flex:1 1 260px;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font-size:15px}
-.bar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font-size:14px}
-.hubs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.hubs button{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:4px 10px;border-radius:999px;font-size:13px;cursor:pointer}
-.hubs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.hubs button small{opacity:.7;margin-left:4px}
-.sec{margin:34px 0 10px}
-.sec h2{margin:0;font-size:22px;display:flex;align-items:baseline;gap:10px}
-.sec h2 .n{font-size:14px;color:var(--mut);font-weight:normal}
-.sec p.blurb{margin:6px 0 0;color:var(--mut);max-width:80ch}
-h3.sub{margin:22px 0 8px;font-size:15px;color:var(--mut);font-weight:600;text-transform:none}
-h3.sub .n{font-weight:normal;margin-left:6px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
-.card[hidden]{display:none}
-.card h4{margin:0;font-size:16px;line-height:1.4}
-.card .en{color:var(--mut);font-size:13px;line-height:1.4}
-.card .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
-.chip{background:var(--chip);color:var(--chipfg);padding:2px 8px;border-radius:999px;white-space:nowrap}
-.chip.v{background:var(--hl)}
-.chip.lic{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
-.chip.lic.ok{background:#e3f3e6;color:#1d5a2a}.chip.lic.no{background:#f6e6e3;color:#7a2a1d}
-@media (prefers-color-scheme:dark){.chip.lic.ok{background:#173a22;color:#9fd8ab}.chip.lic.no{background:#3d1f1a;color:#f0a898}}
-.badge{display:inline-block;background:var(--badge);color:var(--badgefg);padding:1px 8px;border-radius:6px;font-size:12px;margin-bottom:2px;align-self:flex-start}
-.card h4,.card .en,.card p.sum,.card details p,.sec p.blurb{word-break:keep-all;overflow-wrap:break-word} /* 한국어는 단어 단위로 접는다 (실기기 확인) */
-.card p.sum{margin:0;font-size:14px;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
-.card p.sum.open{display:block;-webkit-line-clamp:unset}
-.card details{font-size:13px}.card details summary{cursor:pointer;color:var(--mut)}
-.card details p{margin:6px 0 0;color:var(--fg)}
-.card .who{font-size:12px;color:var(--mut)}
-.card .foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-top:auto}
-.card .todo{font-size:12px;color:var(--mut);font-style:italic}
-.empty{color:var(--mut);padding:30px 0;text-align:center}
-footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
-footer p{margin:4px 0}
-/* 폰: 막대가 칩 여섯 줄로 커져 내용을 덮는다(2026-09-06 실기기). 고정을 풀고 같이 흘러가게 */
+.catalog{--c-bg:var(--theme,#f8f6f1);--c-card:var(--entry,#fffdf9);--c-fg:var(--primary,#1b1b1b);--c-body:var(--content,#2a2a2a);--c-mut:var(--secondary,#6b6b66);--c-line:var(--border,#e6e2d9);--c-chip:var(--code-bg,#f0ede6);
+  color:var(--c-fg);font-size:15px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
+.catalog a{color:inherit}
+.catalog .tally{font-size:14px;color:var(--c-mut);margin:0 0 14px}.catalog .tally b{color:var(--c-fg)}
+.catalog .bar{position:sticky;top:0;z-index:5;background:var(--c-bg);border-bottom:1px solid var(--c-line);padding:10px 0;margin-bottom:20px}
+.catalog .bar .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.catalog input[type=search]{flex:1 1 240px;min-width:180px;padding:8px 12px;border:1px solid var(--c-line);border-radius:8px;background:var(--c-card);color:var(--c-fg);font-size:15px}
+.catalog select{padding:7px 10px;border:1px solid var(--c-line);border-radius:8px;background:var(--c-card);color:var(--c-fg);font-size:14px}
+.catalog button{border:1px solid var(--c-line);background:var(--c-card);color:var(--c-fg);padding:5px 11px;border-radius:999px;font-size:13px;cursor:pointer}
+.catalog .hubs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.catalog .hubs button.on{background:var(--c-fg);border-color:var(--c-fg);color:var(--c-bg)}
+.catalog .hubs button small{opacity:.65;margin-left:4px}
+.catalog .sec{margin:30px 0 6px}
+.catalog .sec h2{margin:0;font-size:1.3rem;display:flex;align-items:baseline;gap:10px}
+.catalog .sec h2 .n{font-size:.85rem;color:var(--c-mut);font-weight:normal}
+.catalog .sec p.blurb{margin:4px 0 8px;color:var(--c-mut);font-size:.92rem;max-width:80ch}
+.catalog h3.sub{margin:18px 0 0;font-size:.82rem;color:var(--c-mut);font-weight:600;letter-spacing:.02em;text-transform:none}
+.catalog h3.sub .n{font-weight:normal;margin-left:6px}
+.catalog .list{margin:0;padding:0;list-style:none}
+.catalog .item{padding:14px 0;border-bottom:1px solid var(--c-line);display:flex;flex-direction:column;gap:5px}
+.catalog .item[hidden]{display:none}
+.catalog .item h4{margin:0;font-size:1.02rem;line-height:1.4;font-weight:600}
+.catalog .item .en{color:var(--c-mut);font-size:.82rem;line-height:1.4}
+.catalog .meta{display:flex;flex-wrap:wrap;gap:5px;font-size:.74rem;margin-top:2px}
+.catalog .chip{background:var(--c-chip);color:var(--c-fg);padding:1px 8px;border-radius:999px;white-space:nowrap}
+.catalog .chip.v{font-weight:600}
+.catalog .chip.lic{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.68rem}
+.catalog .chip.lic.ok{background:#e3f3e6;color:#1d5a2a}.catalog .chip.lic.no{background:#f6e6e3;color:#7a2a1d}
+:root[data-theme="dark"] .catalog .chip.lic.ok{background:#173a22;color:#9fd8ab}:root[data-theme="dark"] .catalog .chip.lic.no{background:#3d1f1a;color:#f0a898}
+.catalog .badge{display:inline-block;font-size:.72rem;color:var(--c-mut);border:1px solid var(--c-line);border-radius:4px;padding:0 6px;align-self:flex-start}
+.catalog p.sum{margin:2px 0 0;font-size:.92rem;color:var(--c-body);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.catalog p.sum.open{display:block;-webkit-line-clamp:unset}
+.catalog details{font-size:.85rem}.catalog details summary{cursor:pointer;color:var(--c-mut)}.catalog details p{margin:6px 0 0;color:var(--c-body)}
+.catalog .who{font-size:.78rem;color:var(--c-mut)}
+.catalog .foot{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem;margin-top:2px}
+.catalog .foot a{text-decoration:underline;text-underline-offset:2px}
+.catalog .foot a.note{font-weight:600}
+.catalog .todo{font-size:.78rem;color:var(--c-mut);font-style:italic}
+.catalog .empty{color:var(--c-mut);padding:30px 0;text-align:center}
+.catalog footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--c-line);color:var(--c-mut);font-size:.8rem}
+.catalog footer p{margin:4px 0}
 @media (max-width:640px){
-  .bar{position:static;padding:8px 0;margin-bottom:16px}
-  .bar .row{gap:6px}
-  .hubs{gap:5px}
-  .hubs button{padding:3px 9px;font-size:12px}
+  .catalog .bar{position:static;padding:6px 0;margin-bottom:14px}
+  .catalog .hubs{gap:5px}.catalog .hubs button{padding:3px 9px;font-size:12px}
 }
 """
 
@@ -83,7 +75,7 @@ JS = """
 (function(){
   var q=document.getElementById('q'),kind=document.getElementById('kind'),year=document.getElementById('year');
   var hubBtns=[].slice.call(document.querySelectorAll('.hubs button'));
-  var cards=[].slice.call(document.querySelectorAll('.card'));
+  var cards=[].slice.call(document.querySelectorAll('.catalog .item'));
   var hub='';
   function norm(s){return (s||'').toLowerCase();}
   function apply(){
@@ -92,11 +84,11 @@ JS = """
       var ok=(!hub||c.dataset.hub===hub)&&(!k||c.dataset.kind===k)&&(!y||c.dataset.year===y)&&(!text||c.dataset.q.indexOf(text)>=0);
       c.hidden=!ok; if(ok) shown++;
     });
-    document.querySelectorAll('.sec').forEach(function(sec){
-      var n=0; sec.querySelectorAll('.card').forEach(function(c){ if(!c.hidden) n++; });
+    document.querySelectorAll('.catalog .sec').forEach(function(sec){
+      var n=0; sec.querySelectorAll('.item').forEach(function(c){ if(!c.hidden) n++; });
       sec.hidden=n===0; var lbl=sec.querySelector('h2 .n'); if(lbl) lbl.textContent=n;
       sec.querySelectorAll('.subblock').forEach(function(b){
-        var m=0; b.querySelectorAll('.card').forEach(function(c){ if(!c.hidden) m++; });
+        var m=0; b.querySelectorAll('.item').forEach(function(c){ if(!c.hidden) m++; });
         b.hidden=m===0; var l=b.querySelector('h3 .n'); if(l) l.textContent=m;
       });
     });
@@ -113,14 +105,34 @@ JS = """
 """
 
 
-def card(p: dict) -> str:
+def note_links(root: Path = None):
+    """notes/<slug>.md 의 front matter `paper:` → /notes/<slug>/ . 노트가 있는 논문에만 링크가 붙는다."""
+    root = root or P.ROOT
+    out = {}
+    ndir = root / "notes"
+    if not ndir.exists():
+        return out
+    for md in sorted(ndir.glob("*.md")):
+        if md.name.startswith("_") or md.name.lower() == "readme.md":
+            continue
+        head = md.read_text(encoding="utf-8")[:2000]
+        m = re.search(r"^paper:\s*[\"']?([^\"'\n]+)", head, re.M)
+        if m:
+            out[m.group(1).strip()] = "/notes/%s/" % md.stem
+    return out
+
+
+def card(p: dict, notes: dict = None) -> str:
+    notes = notes or {}
     q = " ".join([p["title_ko"], p["title_en"], p["summary"], p["venue"], p["authors"], p["affil"]] + p["chips"]).lower()
-    out = ['<article class="card" data-hub="%s" data-kind="%s" data-year="%s" data-q="%s">' % (
+    out = ['<li class="item" data-hub="%s" data-kind="%s" data-year="%s" data-q="%s">' % (
         E(p["hub"]), E(p["kind"]), E(p["year"]), E(q, quote=True))]
     if p["badge"]:
         out.append('<span class="badge">%s</span>' % E(p["badge"]))
-    out.append("<h4>%s</h4>" % E(p["title_ko"]))
-    if p["title_en"]:
+    title = E(p["title_ko"])
+    note = notes.get(p["id"])
+    out.append("<h4>%s</h4>" % ('<a href="%s">%s</a>' % (E(note, quote=True), title) if note else title))
+    if p["title_en"] and p["title_en"] != p["title_ko"]:
         out.append('<div class="en">%s</div>' % E(p["title_en"]))
     meta = []
     if p["venue"]:
@@ -141,15 +153,18 @@ def card(p: dict) -> str:
     if p["abstract"]:
         out.append("<details><summary>Abstract</summary><p>%s</p></details>" % E(p["abstract"]))
     if p["authors"]:
-        who = E(p["authors"]) + (" · " + E(p["affil"]) if p["affil"] else "")
-        out.append('<div class="who">%s</div>' % who)
-    link = ('<a href="%s" target="_blank" rel="noopener">Source ↗</a>' % E(p["source_url"], quote=True)) if p["source_url"] else '<span class="todo">source link pending</span>'
-    out.append('<div class="foot"><span class="who">%s</span>%s</div>' % (E(p["subcategory"]), link))
-    out.append("</article>")
+        out.append('<div class="who">%s%s</div>' % (E(p["authors"]), (" · " + E(p["affil"])) if p["affil"] else ""))
+    foot = []
+    if note:
+        foot.append('<a class="note" href="%s">Note →</a>' % E(note, quote=True))
+    foot.append(('<a href="%s" target="_blank" rel="noopener">Source ↗</a>' % E(p["source_url"], quote=True)) if p["source_url"] else '<span class="todo">source link pending</span>')
+    out.append('<div class="foot">%s</div>' % "".join(foot))
+    out.append("</li>")
     return "\n".join(out)
 
 
-def render(data: dict) -> str:
+def render(data: dict, notes: dict = None) -> str:
+    """Hugo 페이지 안에 들어가는 조각. 제목(h1)은 Hugo 레이아웃이 그린다."""
     papers = data["papers"]
     hubs = data.get("hubs", [])
     hub_name = {h["id"]: HUB_EN.get(h["id"], h["name"]) for h in hubs}
@@ -159,14 +174,11 @@ def render(data: dict) -> str:
         groups.setdefault(p["hub"], OrderedDict()).setdefault(p["subcategory"], []).append(p)
     years = sorted({p["year"] for p in papers if p["year"]}, reverse=True)
     kinds = [k for k in P.KINDS if any(p["kind"] == k for p in papers)]
+    notes = notes if notes is not None else {}
 
-    h = ['<!doctype html>', '<html lang="ko">', '<head>', '<meta charset="utf-8">',
-         '<meta name="viewport" content="width=device-width, initial-scale=1">',
-         "<title>%s</title>" % E(TITLE), "<style>%s</style>" % CSS, "</head><body>", '<div class="wrap">',
-         '<header class="top"><h1>%s</h1>' % E(TITLE),
-         "<p>Reading notes on LLM inference and serving. Summaries in Korean, links to the originals.</p>",
-         '<div class="tally"><b>%d</b> papers · <b>%d</b> areas · showing <b id="shown">%d</b></div></header>' % (
-             len(papers), len(groups), len(papers)),
+    h = ["<style>%s</style>" % CSS, '<div class="catalog">',
+         '<p class="tally"><b>%d</b> papers · <b>%d</b> areas · showing <b id="shown">%d</b>%s</p>' % (
+             len(papers), len(groups), len(papers), (" · <b>%d</b> with notes" % len(notes)) if notes else ""),
          '<div class="bar"><div class="row">',
          '<input id="q" type="search" placeholder="Search title, summary, authors, keywords" aria-label="Search">',
          '<select id="kind" aria-label="Depth"><option value="">All depths</option>%s</select>' % "".join(
@@ -186,13 +198,26 @@ def render(data: dict) -> str:
             h.append('<div class="subblock">')
             if sub:
                 h.append('<h3 class="sub">%s<span class="n">%d</span></h3>' % (E(sub), len(ps)))
-            h.append('<div class="grid">%s</div></div>' % "\n".join(card(p) for p in ps))
+            h.append('<ul class="list">%s</ul></div>' % "\n".join(card(p, notes) for p in ps))
         h.append("</section>")
     h.append('<div id="empty" class="empty" hidden>No papers match.</div>')
-    h.append("<footer><p>Each card is a Korean summary of a paper's contribution. Copyrighted text and figures are not reproduced; follow the link to the original.</p>"
+    h.append("<footer><p>Each entry is a Korean summary of a paper's contribution. Copyrighted text and figures are not reproduced; follow the link to the original.</p>"
              "<p>These are personal reading notes and may contain errors. Refer to the original for the facts.</p></footer>")
-    h.append("</div><script>%s</script></body></html>" % JS)
+    h.append("</div><script>%s</script>" % JS)
     return "\n".join(h) + "\n"
+
+
+def render_standalone(data: dict, notes: dict = None) -> str:
+    """미리보기용 완전한 문서. 배포는 조각을 Hugo 가 감싼다."""
+    body = render(data, notes)
+    return "\n".join(['<!doctype html>', '<html lang="ko">', '<head>', '<meta charset="utf-8">',
+                      '<meta name="viewport" content="width=device-width, initial-scale=1">',
+                      "<title>%s</title>" % E(TITLE),
+                      '<style>body{margin:0;background:#f8f6f1;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}.wrap{max-width:720px;margin:0 auto;padding:24px 16px 60px}h1{font-size:1.8rem;margin:0 0 4px}</style>',
+                      "</head><body>", '<div class="wrap"><h1>%s</h1>' % E(TITLE), body, "</div></body></html>"]) + "\n"
+
+
+FRAGMENT = P.ROOT / "site" / "catalog.fragment.html"
 
 
 def main(argv=None) -> int:
@@ -200,19 +225,25 @@ def main(argv=None) -> int:
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--data", default=str(P.DATA))
     ap.add_argument("--out", default=str(SITE))
+    ap.add_argument("--fragment", default=str(FRAGMENT))
     a = ap.parse_args(argv)
-    out = Path(a.out)
-    html_text = render(P.load(Path(a.data)))
+    data = P.load(Path(a.data))
+    notes = note_links()
+    outputs = [(Path(a.out), render_standalone(data, notes)), (Path(a.fragment), render(data, notes))]
     if a.check:
-        cur = out.read_text(encoding="utf-8") if out.exists() else ""
-        if cur != html_text:
-            print("build --check: %s 가 최신이 아니다 — scripts/build 를 돌려라" % out)
-            return 1
+        for out, text in outputs:
+            cur = out.read_text(encoding="utf-8") if out.exists() else ""
+            if cur != text:
+                print("build --check: %s 가 최신이 아니다 — scripts/build 를 돌려라" % out)
+                return 1
         print("build --check: ok")
         return 0
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html_text, encoding="utf-8")
-    print("build: %s (%d bytes)" % (out, len(html_text.encode("utf-8"))))
+    for out, text in outputs:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
+        print("build: %s (%d bytes)" % (out, len(text.encode("utf-8"))))
+    if notes:
+        print("  notes linked: %d" % len(notes))
     return 0
 
 
