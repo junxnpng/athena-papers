@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""source_url 이 arXiv 인 논문의 원문 PDF 를 내려받는다 (오픈 액세스). data/raw/pdf/ 에 둔다(git 제외).
+
+  scripts/fetch-pdf [--only arxiv] [--force]
+
+arXiv 이외 도메인은 건드리지 않는다 — 유료 도서관 자료를 긁지 않는다.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+OUT = P.RAW_DIR / "pdf"
+
+
+def pdf_url(source_url: str) -> str:
+    m = re.match(r"https?://arxiv\.org/abs/(.+)$", source_url or "")
+    return "https://arxiv.org/pdf/%s" % m.group(1) if m else ""
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--force", action="store_true", help="이미 받은 것도 다시 받는다")
+    a = ap.parse_args(argv)
+    papers = P.load()["papers"]
+    todo = [(p, pdf_url(p["source_url"])) for p in papers]
+    todo = [(p, u) for p, u in todo if u]
+    got, skipped, failed, total = 0, 0, [], 0
+    for p, url in todo:
+        dst = OUT / (p["id"] + ".pdf")
+        if dst.exists() and not a.force:
+            skipped += 1
+            total += dst.stat().st_size
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "papers-fetch/1 (personal study)"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                body = r.read()
+            if not body.startswith(b"%PDF"):
+                raise ValueError("PDF 가 아니다 (%d bytes)" % len(body))
+            dst.write_bytes(body)
+            got += 1
+            total += len(body)
+            print("  + %-30s %6.1f MB" % (p["id"], len(body) / 1e6))
+        except Exception as e:  # noqa: BLE001
+            failed.append((p["id"], str(e)[:60]))
+        time.sleep(3)  # arXiv 권장 간격
+    print("pdf: 새로 %d, 이미 있음 %d, 실패 %d — 합계 %.1f MB → %s" % (got, skipped, len(failed), total / 1e6, OUT))
+    for pid, err in failed:
+        print("  실패:", pid, "|", err)
+    nonarxiv = [p["id"] for p in papers if p["source_url"] and not pdf_url(p["source_url"])]
+    print("arXiv 아님(받지 않음) %d편, 링크 없음 %d편" % (len(nonarxiv), sum(1 for p in papers if not p["source_url"])))
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

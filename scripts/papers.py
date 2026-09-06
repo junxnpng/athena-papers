@@ -103,18 +103,12 @@ def derive_year(venue: str, year_chip: str = "") -> str:
     return ""
 
 
-def derive_source_url(venue: str, links) -> str:
-    prio = ["arxiv.org/abs/", "arxiv.org/", "doi.org/", "dl.acm.org/", "usenix.org/", "ieeexplore.ieee.org/",
-            "proceedings.mlsys.org/", "openreview.net/"]
-    for key in prio:
-        for u in links or []:
-            if key in u:
-                return u
-    if "arXiv" in (venue or ""):
-        m = re.search(r"(\d{4}\.\d{4,5})", venue)
-        if m:
-            return "https://arxiv.org/abs/" + m.group(1)
-    return ""
+def derive_source_url(venue: str, links=None) -> str:
+    """venue 문자열에 적힌 arXiv 번호만 쓴다.
+    페이지 본문의 링크 목록은 참고문헌이 섞여 있어 그 논문의 원문이라는 보장이 없다 — 그쪽은
+    scripts/fill-links 가 제목 대조를 거쳐 채운다."""
+    m = re.search(r"arXiv[:\s]*(\d{4}\.\d{4,5})", venue or "", re.I) or re.search(r"\b(\d{4}\.\d{4,5})\b", venue or "")
+    return "https://arxiv.org/abs/" + m.group(1) if m else ""
 
 
 def paper_id(path: str) -> str:

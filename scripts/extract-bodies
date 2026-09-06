@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""미러된 논문 페이지(data/raw/site/papers/)의 본문을 구조를 유지한 텍스트로 뽑는다.
+요약을 쓸 때 읽는 재료다. 저작권이 있는 번역이므로 data/raw/ 안에만 둔다(git 제외).
+
+  scripts/extract-bodies [--out data/raw/bodies]
+
+출력: data/raw/bodies/<hub>/<slug>.md 와 data/raw/bodies/manifest.json (편별 글자 수·섹션 수·그림 수)
+"""
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+MIRROR = P.RAW_DIR / "site" / "papers"
+# 페이지 뼈대 — 본문이 아니다
+DROP_BLOCKS = re.compile(
+    r'<(script|style)\b[^>]*>.*?</\1>'
+    r'|<div class="topbar".*?</div>'
+    r'|<nav class="crumb".*?</nav>'
+    r'|<div class="xref".*?</div>'
+    r'|<nav class="toc".*?</nav>'
+    r'|<div class="footer".*?</div>',
+    re.S | re.I)
+BLOCK_END = re.compile(r'</(p|div|li|tr|figcaption|section|blockquote|td|th)>', re.I)
+HEADING = re.compile(r'<h([1-6])[^>]*>(.*?)</h\1>', re.S | re.I)
+
+
+def text_of(frag: str) -> str:
+    frag = re.sub(r'<sup>(.*?)</sup>', r'^\1', frag, flags=re.S)
+    frag = re.sub(r'<br\s*/?>', ' ', frag, flags=re.I)
+    return re.sub(r'[ \t]+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', frag))).strip()
+
+
+def grab(cls: str, page: str) -> str:
+    m = re.search(r'<div[^>]*class="[^"]*\b%s\b[^"]*"[^>]*>(.*?)</div>' % cls, page, re.S | re.I)
+    return text_of(m.group(1)) if m else ""
+
+
+def convert(page: str) -> dict:
+    page = DROP_BLOCKS.sub(' ', page)
+    m = re.search(r'<h1[^>]*>(.*?)</h1>', page, re.S)
+    title = text_of(m.group(1)) if m else ""
+    eyebrow, authors, affil = grab("eyebrow", page), grab("authors", page), grab("affil", page)
+    body = page[page.index('</header>') + 9:] if '</header>' in page else page
+    body = HEADING.sub(lambda m: "\n\n%s %s\n\n" % ("#" * int(m.group(1)), text_of(m.group(2))), body)
+    body = re.sub(r'<figcaption[^>]*>(.*?)</figcaption>', lambda m: "\n[그림] %s\n" % text_of(m.group(1)), body, flags=re.S | re.I)
+    body = re.sub(r'<figure[^>]*>|</figure>', "\n", body, flags=re.I)
+    body = BLOCK_END.sub("\n", body)
+    body = re.sub(r'<li[^>]*>', "\n- ", body, flags=re.I)
+    lines = [text_of(ln) for ln in body.split("\n")]
+    out, blank = [], 0
+    for ln in lines:
+        if not ln:
+            blank += 1
+            continue
+        if out and blank:
+            out.append("")
+        blank = 0
+        out.append(ln)
+    text = "\n".join(out).strip()
+    head = [x for x in ["# " + title, eyebrow, authors, affil] if x]
+    return {"title": title, "venue": eyebrow, "authors": authors, "affil": affil,
+            "text": "\n".join(head) + "\n\n" + text + "\n",
+            "sections": len(re.findall(r'^##\s', text, re.M)),
+            "figures": len(re.findall(r'^\[그림\]', text, re.M)), "chars": len(text)}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--out", default=str(P.RAW_DIR / "bodies"))
+    a = ap.parse_args(argv)
+    if not MIRROR.exists():
+        sys.exit("미러가 없다 — scripts/mirror 를 먼저 돌린다")
+    out = Path(a.out)
+    ids = [p["id"] for p in P.load()["papers"]]
+    manifest, missing = {}, []
+    for pid in ids:
+        src = MIRROR / pid / "index.html"
+        if not src.exists():
+            missing.append(pid)
+            continue
+        rec = convert(src.read_text(encoding="utf-8", errors="replace"))
+        dst = out / (pid + ".md")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(rec.pop("text"), encoding="utf-8")
+        manifest[pid] = rec
+    (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    total = sum(r["chars"] for r in manifest.values())
+    thin = sorted((r["chars"], k) for k, r in manifest.items())[:3]
+    print("bodies: %d편, %.1f만 자 → %s" % (len(manifest), total / 10000, out))
+    print("  가장 짧은 편: " + ", ".join("%s %d자" % (k, c) for c, k in thin))
+    for m in missing:
+        print("  미러 없음:", m)
+    return 1 if missing else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

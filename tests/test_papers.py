@@ -44,7 +44,7 @@ class ScrubTest(unittest.TestCase):
         self.assertFalse(p["needs_rewrite"])
         self.assertEqual(p["id"], "kv-cache/x")
         self.assertEqual(p["year"], "2024")
-        self.assertEqual(p["source_url"], "https://arxiv.org/abs/2401.00001")
+        self.assertEqual(p["source_url"], "")  # venue 에 번호가 없으면 비운다 — 페이지 링크는 참고문헌일 수 있다
 
     def test_internal_sentence_cuts_rest(self):
         p = P.scrub_paper(raw_paper(summary="첫 문장이다. 🔑 이 스터디에 중요한 것은 SecretProj 다 — 그래서 셋째. 넷째 문장이다."))
@@ -77,9 +77,12 @@ class ScrubTest(unittest.TestCase):
         self.assertEqual(P.derive_year("ACM Computing Surveys 29(2)"), "")
         self.assertEqual(P.derive_year("blog", "2024"), "2024")
 
-    def test_source_url_from_venue_when_no_links(self):
-        self.assertEqual(P.derive_source_url("arXiv 2405.04437", []), "https://arxiv.org/abs/2405.04437")
-        self.assertEqual(P.derive_source_url("MLSys 2024", ["https://example.com/x"]), "")
+    def test_source_url_only_from_venue_stated_number(self):
+        self.assertEqual(P.derive_source_url("arXiv 2405.04437"), "https://arxiv.org/abs/2405.04437")
+        self.assertEqual(P.derive_source_url("arXiv:2607.18141"), "https://arxiv.org/abs/2607.18141")
+        self.assertEqual(P.derive_source_url("MLSys 2024"), "")
+        # 페이지 링크 목록은 참고문헌이 섞이므로 쓰지 않는다
+        self.assertEqual(P.derive_source_url("USENIX OSDI 2024", ["https://arxiv.org/abs/2401.00001"]), "")
 
 
 class ValidateTest(unittest.TestCase):

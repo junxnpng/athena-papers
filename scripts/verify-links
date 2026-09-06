@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""source_url 이 정말 그 논문을 가리키는지 검사한다. 참고문헌 목록의 링크가 잘못 붙는 것을 잡는다.
+
+  scripts/verify-links [--fix] [--report FILE]
+
+arXiv 링크는 공개 API 로 제목을 받아 title_en 과 대조한다. --fix 는 어긋난 링크를 지운다(다시 채우는 것은 fill-links 의 몫).
+arXiv 이외 링크는 도메인만 보고 통과시킨다 — 제목 대조를 할 수 없다.
+"""
+from __future__ import annotations
+
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import re
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import papers as P  # noqa: E402
+
+_ld = importlib.machinery.SourceFileLoader("fill_links", str(HERE / "fill-links"))
+_sp = importlib.util.spec_from_loader("fill_links", _ld)
+FL = importlib.util.module_from_spec(_sp)
+_ld.exec_module(FL)
+
+NS = {"a": "http://www.w3.org/2005/Atom"}
+ARXIV_ABS = re.compile(r"https?://arxiv\.org/abs/(.+?)\.?$")
+VENUE_ID = re.compile(r"\d{4}\.\d{4,5}")
+
+
+def stated_by_author(p: dict) -> bool:
+    """venue 문자열에 arXiv 번호가 있으면 사이트 작성자가 직접 적은 것이다 — 자동으로 지우지 않는다.
+    제목이 어긋나도 개정판에서 제목이 바뀐 경우일 수 있다."""
+    return bool(VENUE_ID.search(p.get("venue", "")))
+
+
+def arxiv_id(url: str) -> str:
+    m = ARXIV_ABS.match(url or "")
+    return re.sub(r"v\d+$", "", m.group(1)) if m else ""
+
+
+def fetch_titles(ids, batch: int = 20, pause: int = 20, tries: int = 4):
+    """id → 제목. 429 를 만나면 기다렸다 다시 시도한다."""
+    out = {}
+    for k in range(0, len(ids), batch):
+        chunk = ids[k:k + batch]
+        q = urllib.parse.urlencode({"id_list": ",".join(chunk), "max_results": str(len(chunk))})
+        url = "http://export.arxiv.org/api/query?%s" % q
+        for attempt in range(tries):
+            try:
+                with urllib.request.urlopen(url, timeout=60) as r:
+                    xml = r.read()
+                break
+            except urllib.error.HTTPError as e:
+                if e.code != 429 or attempt == tries - 1:
+                    print("  조회 실패(%s): %s" % (e.code, ", ".join(chunk[:3])), file=sys.stderr)
+                    xml = b""
+                    break
+                time.sleep(pause * (attempt + 2))
+            except Exception:  # noqa: BLE001
+                xml = b""
+                break
+        if xml:
+            for e in ET.fromstring(xml).findall("a:entry", NS):
+                aid = re.sub(r"v\d+$", "", (e.findtext("a:id", "", NS) or "").rsplit("/", 1)[-1])
+                title = re.sub(r"\s+", " ", (e.findtext("a:title", "", NS) or "")).strip()
+                if aid and title:
+                    out[aid] = title
+        time.sleep(pause)
+    return out
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--fix", action="store_true", help="어긋난 링크를 지운다")
+    ap.add_argument("--report", default="")
+    ap.add_argument("--pause", type=int, default=20)
+    a = ap.parse_args(argv)
+    data = P.load()
+    arx = [(p, arxiv_id(p["source_url"])) for p in data["papers"] if arxiv_id(p["source_url"])]
+    other = [p for p in data["papers"] if p["source_url"] and not arxiv_id(p["source_url"])]
+    print("arXiv %d편 검사, 그 외 %d편은 도메인만 확인" % (len(arx), len(other)))
+    titles = fetch_titles([i for _, i in arx], pause=a.pause)
+    bad, related, unknown, ok = [], [], [], 0
+    for p, aid in arx:
+        got = titles.get(aid)
+        rec = {"id": p["id"], "arxiv": aid, "url": p["source_url"], "ours": p["title_en"], "arxiv_title": got or ""}
+        if not got:
+            rec["why"] = "조회 실패"
+            unknown.append(rec)
+            continue
+        verdict = FL.title_verdict(p["title_en"], got)
+        if verdict == "same":
+            ok += 1
+        elif verdict == "related":  # 같은 논문의 다른 제목 표기일 수 있다 — 지우지 않고 사람에게 보인다
+            rec["why"] = "이름은 같고 제목 표기가 다름"
+            related.append(rec)
+        elif stated_by_author(p):  # 작성자가 venue 에 번호를 적었다 — 개정판 제목 변경일 수 있어 사람이 본다
+            rec["why"] = "제목이 다르나 venue 에 번호가 적혀 있음"
+            related.append(rec)
+        else:
+            rec["why"] = "다른 논문"
+            bad.append(rec)
+    print("일치 %d · 다른 논문 %d · 확인 필요 %d · 조회 실패 %d" % (ok, len(bad), len(related), len(unknown)))
+    for r in related:
+        print("  ~ %-28s %s" % (r["id"], r["arxiv"]))
+        print("      우리 : %s" % r["ours"][:90])
+        print("      arXiv: %s" % r["arxiv_title"][:90])
+    for b in bad:
+        print("  X %-28s %s" % (b["id"], b["arxiv"]))
+        print("      우리 : %s" % b["ours"][:90])
+        print("      arXiv: %s" % b["arxiv_title"][:90])
+    for u in unknown:
+        print("  ? %-28s %s (%s)" % (u["id"], u["arxiv"], u["why"]))
+    if a.report:
+        Path(a.report).write_text(json.dumps({"bad": bad, "related": related, "unknown": unknown, "ok": ok},
+                                             ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    if a.fix and bad:
+        drop = {b["id"] for b in bad}
+        for p in data["papers"]:
+            if p["id"] in drop:
+                p["source_url"] = ""
+        P.dump(data)
+        print("→ 어긋난 링크 %d개 삭제, data/papers.json 갱신" % len(drop))
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

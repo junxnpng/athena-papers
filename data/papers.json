@@ -76,7 +76,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://machinelearningmastery.com/from-prompt-to-prediction-understanding-prefill-decode-and-the-kv-cache-in-llms/",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -102,7 +102,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -128,7 +128,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://redis.io/blog/prefill-vs-decode/",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -154,7 +154,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://medium.com/@sailakkshmiallada/understanding-the-two-key-stages-of-llm-inference-prefill-and-decode-29ec2b468114",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -179,7 +179,7 @@
    "authors": "Ranran Zhen 1 , Juntao Li 1 , Yixin Ji 1 , Zhenlin Yang 1 , Tong Liu 1 , Qingrong Xia 2 , Xinyu Duan 2 , Zhefeng Wang 2 , Baoxing Huai 2 , Min Zhang 1",
    "affil": "1 Soochow University (쑤저우대학교) · 2 Huawei Cloud",
    "abstract": "생성형 AI를 위한 대규모 언어 모델(LLM)은 눈부신 발전을 이루어, 다양한 도메인과 응용에서 널리 채택되는 정교하고 다재다능한 도구로 진화했다. 그러나 방대한 파라미터 수에서 비롯되는 막대한 메모리 오버헤드와, attention 메커니즘의 높은 연산 요구가 결합되면서 LLM 추론 서비스에서 낮은 latency와 높은 throughput을 달성하는 데 큰 어려움을 낳는다. 획기적인 연구들에 힘입은 최근의 진전은 이 분야의 발전을 크게 가속했다. 본 논문은 이런 방법들을 포괄적으로 조사(survey)하며, 기초적인 인스턴스 수준(instance-level) 접근, 심층적인 클러스터 수준(cluster-level) 전략, 신흥 시나리오 방향, 그리고 그 밖의 중요하지만 세부적인 영역을 다룬다. 인스턴스 수준에서는 model placement, request scheduling, decoding length prediction, storage management, disaggregation 패러다임을 검토한다. 클러스터 수준에서는 GPU 클러스터 배치, 다중 인스턴스 load balancing, 클라우드 서비스 해법을 살펴본다. 신흥 시나리오에 대해서는 구체적인 작업, 모듈, 보조 방법을 중심으로 논의를 구성한다. 전체적인 조망을 위해 세부적이지만 중요한 여러 영역도 함께 조명한다. 끝으로, 이 분야를 한층 더 발전시킬 잠재적 연구 방향을 제시한다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2504.19720",
    "figures": 7,
    "needs_rewrite": false
   },
@@ -307,7 +307,7 @@
    "authors": "Noppanat Wadlom, Junyi Shen, Yao Lu",
    "affil": "National University of Singapore, Singapore · {noppanat, j1shen, luyao}@comp.nus.edu.sg",
    "abstract": "Agentic workflow는 서로 의존하는 대규모 언어 모델(LLM) 호출들의 시퀀스로 구성되며, 현대 AI 시스템에서 지배적인 워크로드가 되었다. 이러한 workflow는 speculative·병렬 탐색으로 인한 중복 prompt와 중간 결과로부터 광범위한 redundancy를 드러낸다. vLLM 같은 기존 LLM 서빙 시스템은 개별 추론 호출의 최적화에 집중하고 호출 간(cross-call) 의존성을 간과하여 상당한 비효율을 낳는다. 이 논문은 LLM 및 agent 서빙을 데이터 시스템 관점에서 다시 생각하고, agentic 워크로드를 query plan으로 모델링하며 LLM 호출을 일급(first-class) operator로 취급하는 workflow-aware 서빙 프레임워크 Helium 을 소개한다. Helium은 proactive caching과 cache-aware scheduling을 통합하여 prompt, KV 상태, workflow 전반에 걸친 재사용을 극대화한다. 이러한 기법을 통해 Helium은 고전적 query optimization 원리를 LLM 서빙과 연결하며, 다양한 워크로드에서 최신(state-of-the-art) agent 서빙 시스템 대비 최대 1.56배의 speedup을 달성한다. 우리의 결과는 workflow 전반에 걸친 end-to-end 최적화가 확장 가능하고 효율적인 LLM 기반 agent를 위해 필수적임을 보여준다. CCS Concepts. • Information systems → Query optimization; • Computing methodologies → Multi-agent systems. Keywords. large language models, agentic workflows, query optimization",
-   "source_url": "https://arxiv.org/abs/2402.14034",
+   "source_url": "",
    "figures": 13,
    "needs_rewrite": false
   },
@@ -332,7 +332,7 @@
    "authors": "Zaifeng Pan, Qianxu Wang, Zhengding Hu, Chang Chen, Yue Guan, Yanbo Zhou, Steven Swanson, Yufei Ding",
    "affil": "University of California, San Diego",
    "abstract": "LLM 기반 agent는 continuously 커지는 context를 가지고 multi-turn 워크플로우를 실행하며, 이때 LLM 호출은 tool 호출 및 environment feedback과 서로 얽혀 진행된다. 모델 품질을 유지하기 위해, 현대 agent 프레임워크는 context 길이를 제어하고자 offloading, reduction, isolation 같은 context engineering 전략에 의존한다. 그러나 이러한 전략은 상당한 context transformation 오버헤드 를 유발한다. 즉, 각 transformation은 기존 KV cache를 무효화하고 re-prefill을 촉발하여 time-to-first-token(TTFT)을 증가시킨다. 이 논문에서 우리는 context transformation이 segment-decomposable 하다는 것, 즉 어떤 prefix의 transformation이 미래 token과 독립적이라는 성질을 규명한다. 이 성질 덕분에 transformation을 미리(ahead of time) 실행할 수 있다. 이 통찰에 기반하여, 우리는 agent 프레임워크가 실행 로직을 수정하지 않고도 context transformation을 비동기 연산으로 표현할 수 있게 하는 lookahead 프로그래밍 모델 을 제안한다. 런타임은 이러한 transformation을 선제적으로 실행하여 transform된 KV cache를 미리 준비함으로써, 블로킹 없이 직접적인 context 교체를 가능하게 한다. 나아가 우리는 LLM 서빙 시스템에 lookahead-aware scheduler 를 설계하여, 이러한 비동기 요청을 latency-critical 워크로드와 함께 제어된 간섭 수준으로 지원한다. 우리는 대표적인 context engineering 전략을 지원하도록 우리 방법을 구현하고, 이를 기존 agent 프레임워크 및 LLM 서빙 시스템에 통합한다. 실험 결과 우리의 접근은 transformation 오버헤드를 효과적으로 제거하고 TTFT를 최대 11.9배 줄인다. 소스 코드, 데이터 및 기타 artifact는 https://github.com/PanZaifeng/SmoothAgent 에서 공개되어 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2607.00151",
    "figures": 15,
    "needs_rewrite": false
   },
@@ -383,7 +383,7 @@
    "authors": "Aleksa Gordić",
    "affil": "vLLM Blog · 2025-09-05",
    "abstract": "참고: 원래 Aleksa Gordić의 개인 웹사이트에 게시된 글이다. paged attention, continuous batching, prefix caching, specdec 등에서부터 대규모의 multi-GPU, multi-node 동적 serving까지. 이 글에서는 현대적인 고(高)throughput LLM 추론 시스템을 구성하는 모든 핵심 시스템 구성 요소와 고급 기능을 차근차근 소개한다. 특히 vLLM [1]이 어떻게 동작하는지를 분해해 살펴본다. 이 글은 시리즈의 첫 번째 편이다. 넓게 시작해서 점점 세부를 쌓아 올리는 방식(역피라미드 방식)을 따르므로, 세세한 것에 빠져 허우적대지 않으면서도 전체 시스템에 대한 정확한 고수준 멘탈 모델을 형성할 수 있다. 이후의 글들에서는 특정 서브시스템으로 파고들 것이다. 이 글은 다섯 부분으로 구성되어 있다. LLM engine & engine core : vLLM의 기본 원리(scheduling, paged attention, continuous batching 등). 고급 기능 : chunked prefill, prefix caching, guided & speculative decoding, disaggregated P/D. Scaling up : single-GPU에서 multi-GPU 실행으로. Serving 계층 : 분산·동시성 웹 스캐폴딩. 벤치마크와 auto-tuning : latency와 throughput 측정. 참고: * 분석은 commit 42172ad (2025년 8월 9일) 기준이다. 대상 독자 : 최신 LLM 엔진이 어떻게 동작하는지 궁금한 사람, 그리고 vLLM, SGLang 등에 기여하는 데 관심 있는 사람 모두. 나는 V1 엔진에 집중한다. V0(현재 deprecated)도 살펴봤는데, 프로젝트가 어떻게 진화해 왔는지 이해하는 데 유용했고 많은 개념이 여전히 그대로 이어진다. LLM Engine / Engine Core에 관한 첫 절은 다소 부담스럽거나 건조하게 느껴질 수 있다. 하지만 나머지 부분에는 예시와 시각 자료가 넘쳐난다. :)",
-   "source_url": "",
+   "source_url": "https://blog.vllm.ai/2025/09/05/anatomy-of-vllm.html",
    "figures": 18,
    "needs_rewrite": false
   },
@@ -433,7 +433,7 @@
    "authors": "Amey Agrawal², Nitin Kedia¹, Ashish Panwar¹, Jayashree Mohan¹, Nipun Kwatra¹, Bhargav S. Gulavani¹, Alexey Tumanov², Ramachandran Ramjee¹",
    "affil": "¹Microsoft Research India · ²Georgia Institute of Technology",
    "abstract": "모든 LLM 서빙 요청은 두 단계를 거친다. 첫 번째는 prefill 로, 전체 입력 프롬프트를 처리하여 첫 번째 출력 token을 생성한다. 두 번째는 decode 로, 나머지 출력 token을 한 번에 하나씩 생성한다. prefill iteration은 latency가 높지만 입력 프롬프트를 병렬로 처리하기 때문에 GPU 연산을 포화시킨다. 반면 decode iteration은 latency가 낮지만, 요청당 한 번에 단 하나의 token만 처리하므로 연산 활용률(compute utilization)도 낮다. 이 때문에 batching은 decode에 대해 매우 효과적이며 결과적으로 전체 활용률을 높인다. 그러나 여러 요청을 batching하면 prefill iteration과 decode iteration이 서로 뒤섞이게 되어, 높은 throughput과 낮은 latency를 동시에 달성하기가 어려워진다. 우리는 이 throughput-latency 트레이드오프를 해소하기 위해 효율적인 LLM 추론 scheduler인 Sarathi-Serve를 제안한다. Sarathi-Serve는 prefill 요청을 거의 동일한 크기의 chunk로 분할하는 chunked-prefills 를 도입하고, 진행 중인 decode를 멈추지 않으면서 새 요청을 batch에 추가하는 stall-free 스케줄을 생성한다. stall-free scheduling은 latency에 미치는 batching의 영향을 최소화하면서 큰 batch size로 throughput을 향상시킬 기회를 열어준다. 나아가 Sarathi-Serve의 균일한 batch는 iteration 간의 불균형을 완화하여 pipeline bubble을 최소화한다. 우리의 기법은 tail latency 제약 하에서 다양한 모델과 하드웨어에 걸쳐 추론 성능을 크게 향상시킨다. 단일 A100 GPU의 Mistral-7B에서는 2.6배 높은 서빙 용량을, 두 개의 A100 GPU의 Yi-34B 모델에서는 vLLM 대비 최대 3.7배 높은 서빙 용량을 달성한다. Falcon-180B에서 pipeline parallelism과 함께 사용할 경우 Sarathi-Serve는 end-to-end 서빙 용량에서 최대 5.6배의 이득을 제공한다. Sarathi-Serve의 소스 코드는 https://github.com/microsoft/sarathi-serve 에서 이용할 수 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2403.02310",
    "figures": 14,
    "needs_rewrite": false
   },
@@ -458,7 +458,7 @@
    "authors": "Lianmin Zheng 2,∗ , Liangsheng Yin 3 , Zhiqiang Xie 1 , Chuyue Sun 1 , Jeff Huang 4 , Cody Hao Yu 5 , Shiyi Cao 2 , Christos Kozyrakis 1 , Ion Stoica 2 , Joseph E. Gonzalez 2 , Clark Barrett 1 , Ying Sheng 1,∗",
    "affil": "1 Stanford University · 2 UC Berkeley · 3 Shanghai Jiao Tong University · 4 Texas A&M University · 5 Independent Researcher · ( ∗ 공동 기여)",
    "abstract": "대규모 언어 모델(LLM)은 여러 번의 생성 호출, 고급 prompting 기법, 제어 흐름, 그리고 구조화된 입력·출력을 요구하는 복잡한 작업에 점점 더 많이 사용되고 있다. 그러나 이러한 응용을 프로그래밍하고 실행하기 위한 효율적인 시스템은 부족한 상황이다. 우리는 복잡한 언어 모델 프로그램을 효율적으로 실행하기 위한 시스템 SGLang 을 제안한다. SGLang은 프론트엔드 언어와 런타임으로 구성된다. 프론트엔드는 생성 및 병렬성 제어를 위한 primitive를 제공하여 프로그래밍을 단순화한다. 런타임은 KV cache 재사용을 위한 RadixAttention , 그리고 더 빠른 구조화된 출력 decoding을 위한 compressed finite state machine 같은 새로운 최적화로 실행을 가속한다. 실험 결과, SGLang은 agent 제어, 논리 추론, few-shot learning 벤치마크, JSON decoding, retrieval-augmented generation 파이프라인, multi-turn chat 등 다양한 작업에서 여러 대규모 언어·멀티모달 모델에 대해 최신 추론 시스템 대비 최대 6.4배 높은 throughput을 달성한다. 코드는 https://github.com/sgl-project/sglang 에서 공개되어 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2312.07104",
    "figures": 14,
    "needs_rewrite": false
   },
@@ -508,7 +508,7 @@
    "authors": "Bin Gao 1,∗ , Zhuomin He 2,∗ , Puru Sharma 1 , Qingxuan Kang 1 , Djordje Jevdjic 1 , Junbo Deng 3 , Xingkun Yang 3 , Zhou Yu 3 , Pengfei Zuo 3,†",
    "affil": "1 National University of Singapore · 2 Shanghai Jiaotong University · 3 Huawei Cloud · ( ∗ Huawei Cloud 인턴십 중 수행, † 교신저자)",
    "abstract": "다중 턴(multi-turn) 대화를 통해 사람과 상호작용하는 것은 대규모 언어 모델(LLM)의 근본적인 기능이다. 그러나 다중 턴 대화를 실행하는 기존 LLM 서빙 엔진은, 과거 token들의 key-value(KV) cache를 반복해서 다시 계산해야 하기 때문에 비효율적이며 높은 서빙 비용을 초래한다. 이 문제를 해결하기 위해, 본 논문은 다중 턴 대화 전반에 걸쳐 KV cache의 재사용을 가능하게 하여 반복 계산 오버헤드를 크게 줄이는 새로운 attention 메커니즘 CachedAttention 을 제안한다. CachedAttention은 비용 효율적인 메모리/스토리지 매체를 활용하여 모든 요청의 KV cache를 저장하는 계층적(hierarchical) KV caching 시스템을 유지한다. 느린 매체로부터의 KV cache 접근 오버헤드를 줄이기 위해, CachedAttention은 layer-wise pre-loading과 asynchronous saving 기법을 사용하여 KV cache 접근을 GPU 연산과 겹친다(overlap). 접근할 KV cache가 가장 빠른 계층에 배치되도록 보장하기 위해, CachedAttention은 scheduler-aware fetching 및 eviction 기법을 사용하여 추론 작업 scheduler의 힌트를 바탕으로 KV cache를 각 계층에 의식적으로 배치한다. context window 오버플로로 인해 저장된 KV cache가 무효화되는 것을 피하기 위해, CachedAttention은 positional encoding을 분리(decoupling)하고 KV cache를 효과적으로 truncation함으로써 저장된 KV cache가 유효하게 유지되도록 한다. 광범위한 실험 결과, CachedAttention은 다중 턴 대화에서 time to the first token(TTFT)을 최대 87% 줄이고, prompt prefilling throughput을 최대 7.8배 향상시키며, end-to-end 추론 비용을 최대 70% 절감함을 보였다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2403.19708",
    "figures": 25,
    "needs_rewrite": false
   },
@@ -610,7 +610,7 @@
    "authors": "Ying Sheng 1 , Lianmin Zheng 2 , Binhang Yuan 3 , Zhuohan Li 2 , Max Ryabinin 4,5 , Daniel Y. Fu 1 , Zhiqiang Xie 1 , Beidi Chen 6,7 , Clark Barrett 1 , Joseph E. Gonzalez 2 , Percy Liang 1 , Christopher Ré 1 , Ion Stoica 2 , Ce Zhang 3",
    "affil": "1 Stanford University · 2 UC Berkeley · 3 ETH Zürich · 4 Yandex · 5 HSE University · 6 Meta · 7 Carnegie Mellon University",
    "abstract": "대규모 언어 모델(LLM) 추론은 연산·메모리 요구량이 매우 커서, 여러 대의 고성능 가속기가 있어야만 실행이 가능하다. 그러나 batch 처리로 latency에 둔감한 작업의 수요가 늘어나고 있는 상황에 착안하여, 본 논문은 단일 commodity GPU 같은 제한된 자원으로 LLM을 고 throughput으로 추론하는 연구를 개시한다. 우리는 제한된 GPU 메모리에서 LLM을 실행하는 고 throughput 생성 엔진 FlexGen 을 제안한다. FlexGen은 GPU, CPU, disk의 메모리와 연산을 통합함으로써 다양한 하드웨어 자원 제약 아래에서 유연하게 구성될 수 있다. 선형 계획법(linear programming) 문제를 풀어, FlexGen은 텐서를 저장하고 접근하기 위한 효율적인 패턴을 탐색한다. 나아가 FlexGen은 weight와 attention cache를 4비트로 압축하며 정확도 손실은 무시할 만한 수준이다. 이 기법들 덕분에 FlexGen은 batch 크기 선택의 폭이 넓어져 최대 throughput을 크게 끌어올린다. 그 결과, 단일 16GB GPU에서 OPT-175B를 실행할 때 FlexGen은 최신 offloading 시스템 대비 훨씬 높은 throughput을 달성하며, 유효 batch 크기 144에서 처음으로 초당 1 token의 생성 throughput에 도달한다. HELM 벤치마크에서 FlexGen은 16GB GPU로 30B 모델을 7개의 대표적 sub-scenario에 대해 21시간 만에 벤치마킹할 수 있다. 코드는 https://github.com/FMInference/FlexGen 에서 공개되어 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2303.06865",
    "figures": 5,
    "needs_rewrite": false
   },
@@ -688,7 +688,7 @@
    "authors": "Wonbeom Lee † , Jungi Lee † , Junghwan Seo, Jaewoong Sim",
    "affil": "Seoul National University · ( † 공동 제1저자)",
    "abstract": "Transformer 기반 대규모 언어 모델(LLM)은 다양한 자연어 처리 과제에서 인상적인 성능을 보인다. 그러나 긴 콘텐츠 생성을 위한 LLM 추론을 서빙하는 것은 key-value(KV) cache라 불리는 일시적 상태의 막대한 메모리 footprint 때문에 어려운데, 이 상태는 시퀀스 길이와 batch 크기에 비례하여 커진다. 이 논문에서 우리는 긴 텍스트 생성에 맞춰 설계된 새로운 KV cache 관리 프레임워크 InfiniGen을 제시하며, 이는 최신 offloading 기반 추론 시스템과 상호 보완적으로 동작한다. InfiniGen은 다음 attention 레이어를 계산하는 데 필수적인 소수의 important token을, 현재 레이어의 입력과 다음 레이어의 query weight 및 key cache의 일부를 이용한 최소한의 리허설(rehearsal)을 수행함으로써 speculation할 수 있다는 핵심 통찰을 활용한다. 이를 통해 우리는 (모든 KV cache 항목을 가져오지 않고) 필수적인 KV cache 항목만 prefetch할 수 있으며, 따라서 offloading 기반 LLM 서빙 시스템에서 host memory로부터의 fetch 오버헤드를 완화한다. 여러 대표적인 LLM에 대한 우리의 평가는 InfiniGen이 기존 KV cache 관리 방법 대비 최신 offloading 기반 시스템의 전체 성능을 최대 3.00배까지 향상시키면서 상당히 더 나은 모델 정확도를 제공함을 보여준다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2406.19707",
    "figures": 20,
    "needs_rewrite": false
   },
@@ -714,7 +714,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://medium.com/data-science/deep-dive-into-kv-caching-in-mistral-7e0cea8409a1",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -739,7 +739,7 @@
    "authors": "Tian Xia 1 , Hanchen Li 1 , Zhifei Li 2 , Xiaokun Chen 3 , Hao Kang 4 , Yifan Qiao 1 , Yi Xu 1 , Ion Stoica 1",
    "affil": "1 University of California, Berkeley · 2 Renmin University of China · 3 Stanford University · 4 Georgia Institute of Technology",
    "abstract": "현대의 LLM 서빙 시스템은 점점 더 agentic 워크로드를 호스팅하고 있으며, 이러한 세션은 tool call과 인터리빙된 수십 번의 모델 호출을 발행하면서 여러 step에 걸쳐 재사용될 수 있는 KV cache를 누적한다. 요청들의 전체 KV cache 크기가 GPU HBM 용량을 쉽게 초과하기 때문에, 연구자들은 이를 CPU DRAM으로 offloading 한다. 그러나 tool-call 지속 시간은 수 자릿수(orders of magnitude)에 걸쳐 변하며, tier 간 KV cache 전송 비용 때문에 매 호출마다 항목을 재배치하는 것은 비현실적이다. 우리는 agentic program이 두 개의 phase 구조, 즉 짧은 tool call이 빠르게 이어지는 busy phase와 장시간 실행되는 호출이 지배하는 idle phase를 보인다는 점을 관찰한다. LRU 같은 현재의 eviction 정책은 이 속성을 포착하지 못한다. 이진적인 busy/idle 라벨 또한 충분하지 않은데, busy 프로그램 대 idle 프로그램의 비율이 하드웨어의 GPU 대 CPU 용량 비율과 일치하지 않을 수 있기 때문이다. 일치하지 않을 때는 한 tier가 저활용되는 동안 다른 tier는 초과 구독되어, 메모리를 낭비하거나 불필요한 eviction을 강제한다. 우리는 위 문제를 해결하는 agent 서빙 시스템 MORI를 제시한다. 우리의 핵심 통찰은 idleness가 연속적이고 상대적인 spectrum이라는 것이다. MORI는 모든 활성 프로그램을 idleness 기준으로 순위 매기고, 가장 busy한 프로그램을 GPU HBM에, 가장 idle한 프로그램을 CPU DRAM에 배치하며, 하드웨어 용량에 맞추어 분할 경계를 동적으로 이동시키고, 각 메모리 tier에서 admission control을 강제한다. Claude Code에서 수집한 실제 coding agent 워크로드에서 네 가지 GPU 및 모델 조합에 걸쳐 평가한 결과, MORI는 offloading을 갖춘 최고의 baseline 대비 20–71% 높은 throughput과 18–43% 낮은 TTFT를 제공한다. 키워드. LLM Inference, Agents, Memory Offloading, Scheduling, Load Balancing",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2606.00866",
    "figures": 10,
    "needs_rewrite": false
   },
@@ -842,7 +842,7 @@
    "authors": "Cunchen Hu 2,3 , Heyang Huang 2,3 , Junhao Hu 4 , Jiang Xu 1 , Xusheng Chen 1 , Tao Xie 4 , Chenxi Wang 2,3 , Sa Wang 2,3 , Yungang Bao 2,3 , Ninghui Sun 2,3 , Yizhou Shan 1",
    "affil": "1 Huawei Cloud · 2 UCAS · 3 ICT, CAS · 4 Peking University",
    "abstract": "대규모 언어 모델(LLM) 서빙은 context caching과 disaggregated inference 같은 기법을 활용하면서 stateless 시스템에서 stateful 시스템으로 변모해 왔다. 이러한 최적화는 KV cache의 수명(lifespan)과 관리 범위(domain)를 확장하며, 이에 따라 새로운 아키텍처적 접근이 요구된다. 우리는 inter-request 최적화와 intra-request 최적화를 하나의 통합 시스템 안에서 결합하는 MemServe 를 제안한다. MemServe는 서빙 instance 전반에 걸친 분산 메모리와 KV cache를 관리하는 elastic memory pool인 MemPool 을 도입한다. MemServe는 MemPool API를 사용하여 context caching과 disaggregated inference를 최초로 결합하며, 이는 전역 prompt tree 기반의 locality-aware 정책으로 cache 재사용을 강화하는 global scheduler에 의해 뒷받침된다. 실험 결과 MemServe는 job completion time(JCT)과 time-to-first-token(TTFT)을 크게 개선한다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2406.17565",
    "figures": 15,
    "needs_rewrite": false
   },
@@ -867,7 +867,7 @@
    "authors": "Ruoyu Qin ♠♡ , Zheming Li ♠ , Weiran He ♠ , Mingxing Zhang ♡ , Yongwei Wu ♡ , Weimin Zheng ♡ , Xinran Xu ♠",
    "affil": "♠ Moonshot AI · ♡ Tsinghua University",
    "abstract": "Mooncake는 Moonshot AI가 제공하는 대표적 LLM 서비스인 Kimi의 서빙 플랫폼이다. 이 플랫폼은 prefill 클러스터와 decoding 클러스터를 분리하는 KVCache 중심 분리형(disaggregated) 아키텍처를 특징으로 한다. 또한 GPU 클러스터에서 충분히 활용되지 못하던 CPU, DRAM, SSD 자원을 활용하여 KVCache의 분리형 캐시를 구현한다. Mooncake의 핵심은 KVCache 중심 scheduler로, 전체 유효 throughput을 최대화하는 동시에 latency 관련 SLO(Service Level Objective)를 충족하도록 균형을 맞춘다. 모든 요청이 처리될 것이라고 가정하는 전통적 연구들과 달리, Mooncake는 매우 심하게 과부하된 상황에서 오는 도전에 직면한다. 이를 완화하기 위해 우리는 예측 기반 조기 거부(early rejection) 정책을 개발했다. 실험 결과 Mooncake는 long-context 시나리오에서 특히 뛰어났다. baseline 방법과 비교했을 때, 일부 시뮬레이션 시나리오에서 Mooncake는 SLO를 지키면서 throughput을 최대 525%까지 향상시킬 수 있다. 실제 워크로드에서 Mooncake의 혁신적 아키텍처는 Kimi가 75% 더 많은 요청을 처리할 수 있게 한다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2407.00079",
    "figures": 13,
    "needs_rewrite": false
   },
@@ -892,7 +892,7 @@
    "authors": "Vikranth Srivatsa ∗ , Zijian He ∗ , Reyna Abhyankar, Dongming Li, Yiying Zhang",
    "affil": "University of California, San Diego · ( ∗ 공동 제1저자)",
    "abstract": "대규모 언어 모델(LLM)에 주어지는 prompt는 단순한 사용자 질문을 넘어 진화했다. LLM이 복잡한 문제를 풀도록 하기 위해, 오늘날의 관행은 도메인 특화 지시문, 도구 사용 예시, 그리고/또는 교과서 챕터와 같은 긴 문맥을 prompt에 포함하는 것이다. 그 결과, prompt의 많은 부분이 요청 간에 반복적이다. 최근 연구들은 prompt의 KV state를 캐싱하고 재사용할 것을 제안한다. 그러나 이들은 모두 단일 GPU 최적화에 국한되어 있는 반면, 실제 프로덕션 LLM 서빙 시스템은 본질적으로 분산되어 있다. 이 논문은 prompt sharing 을 목표로 삼아 최적화하는 최초의 분산 LLM 서빙 플랫폼 Preble 을 제안한다. 우리는 새로운 scheduling 알고리즘과 계층적 scheduling 메커니즘을 통해 KV state 재사용과 연산 load balancing을 함께 최적화하는 분산 scheduling 시스템을 설계했다. 두 오픈소스 LLM에서 실제 워크로드와 요청 도착 패턴으로 Preble을 평가한 결과, Preble은 SOTA 서빙 시스템 대비 평균 latency에서 1.5배–14.5배, p99 latency에서 2배–10배 뛰어난 성능을 보였다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2407.00023",
    "figures": 12,
    "needs_rewrite": false
   },
@@ -917,7 +917,7 @@
    "authors": "Saurabh Agarwal 1 , Anyong Mao 2 , Aditya Akella 1 , Shivaram Venkataraman 2",
    "affil": "1 University of Texas at Austin · 2 University of Wisconsin–Madison",
    "abstract": "대규모 언어 모델(LLM)은 챗봇, 코드 에디터, 대화형 에이전트 같은 응용에 점점 더 많이 배포되고 있다. LLM의 핵심 특징 중 하나는 사람이나 외부 도구와 multi-turn 상호작용을 수행할 수 있다는 점이며, 이는 매우 다양한 작업을 가능하게 한다. multi-turn 상호작용에서 각 새 요청은 진행 중인 상호작용의 이전 요청들이 남긴 중간 상태, 구체적으로는 key-value(K, V) cache에 의존한다. 기존 서빙 엔진은 이 K, V cache를 재계산(recompute)하거나 main memory로 offload한다. 프로파일링 결과, 재계산은 처리된 token의 99% 이상이 중복(redundant)이 될 수 있음을 보인다. 반면, GPU 메모리에서 K, V cache를 offload하면 추론 서빙이 stateful해져 클러스터 전반에 load imbalance를 초래한다. 이러한 문제를 해결하기 위해 우리는 SYMPHONY를 개발했다. SYMPHONY는 multi-turn 워크로드가 K, V cache를 서빙의 critical path 밖으로 migration할 수 있게 해주는 추가적 힌트를 제공한다는 관찰을 활용한다. 이러한 힌트를 이용하여 SYMPHONY는 K, V cache를 동적으로 migration하고, 추론 요청의 세밀한(fine-grained) scheduling을 가능하게 한다. 우리의 실험은 SYMPHONY가 최신(state-of-the-art) baseline 대비 유사한 latency 프로파일을 유지하면서 8배 이상 많은 요청을 처리할 수 있음을 보인다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2412.16434",
    "figures": 18,
    "needs_rewrite": false
   },
@@ -942,7 +942,7 @@
    "authors": "Jiayi Yao 1,2 , Hanchen Li 1 , Yuhan Liu 1 , Siddhant Ray 1 , Yihua Cheng 1 , Qizheng Zhang 3 , Kuntai Du 1 , Shan Lu 4,1 , Junchen Jiang 1",
    "affil": "1 University of Chicago · 2 CUHK Shenzhen · 3 Stanford University · 4 Microsoft Research",
    "abstract": "대규모 언어 모델(LLM)은 필요한 문맥을 제공하기 위해 입력에 여러 개의 text chunk를 포함하는 경우가 많다. 긴 LLM 입력의 prefill을 가속하기 위해, 한 텍스트의 KV cache를 미리 계산해 두었다가 그 문맥이 다른 LLM 입력의 prefix로 재사용될 때 그 KV cache를 재사용할 수 있다. 그러나 재사용되는 text chunk가 항상 입력의 prefix인 것은 아니며, 이 경우 미리 계산된 KV cache는 앞선 텍스트와의 cross-attention을 무시하기 때문에 곧바로 사용할 수 없다. 따라서 KV cache를 재사용함으로써 얻을 수 있는 이득은 대부분 실현되지 못한 채 남아 있다. 이 논문은 단 하나의 과제, 즉 하나의 LLM 입력에 여러 개의 text chunk가 들어 있을 때, 값비싼 full prefill(즉, KV cache를 재사용하지 않는 방식)과 동일한 생성 품질을 얻으면서 각 chunk의 미리 계산된 KV cache를 어떻게 빠르게 결합할 것인가에 초점을 맞춘다. 이 과제는 retrieval-augmented generation(RAG)에서 자연스럽게 발생하는데, RAG에서는 입력이 검색된 여러 텍스트로 문맥으로서 보강되기 때문이다. 우리는 prefix 여부와 무관하게 미리 계산된 KV cache를 재사용하되, 재사용된 각 KV cache를 부분적으로 갱신하기 위해 소수의 token만 선택적으로 다시 계산하는 기법 CacheBlend를 제시한다. 이때 일부 token을 다시 계산하는 데 드는 작은 추가 지연은 같은 작업 안에서의 KV cache 검색(retrieval)과 pipeline으로 겹칠 수 있어, CacheBlend가 KV cache를 더 큰 용량을 가진 느린 저장 장치에 저장하면서도 추론 지연을 늘리지 않고 그것을 가져올 수 있게 한다. 다양한 크기의 오픈소스 LLM 3종과 서로 다른 과제의 인기 벤치마크 데이터셋 4종에서 CacheBlend를 최신 KV cache 재사용 기법들과 비교한 결과, CacheBlend는 생성 품질을 손상시키지 않으면서 full KV recompute 대비 time-to-first-token(TTFT)을 2.2–3.3배 줄이고 추론 throughput을 2.8–5배 높인다. 코드는 https://github.com/LMCache/LMCache 에서 공개되어 있다. CCS Concepts. • Computing methodologies → Natural language processing; • Networks → Cloud computing; • Information systems → Data management systems. Keywords. Large Language Models, KV Cache, Retrieval-Augmented-Generation",
-   "source_url": "https://arxiv.org/abs/2302.13971.",
+   "source_url": "https://arxiv.org/abs/2405.16444",
    "figures": 17,
    "needs_rewrite": false
   },
@@ -994,7 +994,7 @@
    "authors": "Yuhan Liu 1,2,∗ , Jiayi Yao 1,2,∗ , Yihua Cheng 1,∗ , Yuwei An 1 , Xiaokun Chen 1 , Shaoting Feng 1,2 , Yuyang Huang 1,2 , Samuel Shen 1 , Rui Zhang 1 , Kuntai Du 1 , Junchen Jiang 1",
    "affil": "1 Tensormesh Inc. · 2 University of Chicago · ( ∗ 공동 기여)",
    "abstract": "KV cache는 전통적으로 대규모 언어 모델(LLM) 추론의 decode 단계를 가속하기 위해 GPU 메모리에 저장되어 왔다. 그러나 서로 다른 query와 inference engine 간의 cache reuse를 가능하게 하기 위해, KV cache를 GPU 장치 바깥으로 옮기는 것이 점점 더 필요해지고 있다. 우리의 실세계 사용 통계가 이 추세를 확인해 준다. 시간이 지날수록 사용자가 저장한 전체 KV cache는 빠르게 늘어나 GPU 메모리 용량을 크게 초과한다. 이러한 필요에도 불구하고, KV cache를 offloading하고 전송하는 효율적인 해법이 부재하다. 우리는 최초이자 현재까지 가장 효율적인 오픈소스 KV caching 해법인 LMCache 를 제시한다. LMCache는 현대적 LLM 엔진(vLLM 및 SGLang)이 생성한 KV cache를 GPU 메모리 밖으로 추출·저장하고 이를 여러 engine과 query에 걸쳐 공유한다. LMCache는 cache offloading(query 간 prefix reuse)과 prefill–decode(PD) disaggregation(engine/GPU 간 cache 전송)을 모두 지원한다. LMCache의 높은 성능과 폭넓은 채택은 다음의 기여에서 비롯된다. (i) batch된 데이터 이동 연산, compute와 I/O의 pipelining으로 뒷받침되는 고도로 최적화된 KV cache 데이터 이동, (ii) LMCache를 빠르게 진화하는 inference engine으로부터 분리(decouple)하는 모듈식 KV cache connector 컴포넌트, (iii) pinning, lookup, cleanup, movement, compression 등 GPU·CPU·storage·network 레이어에 걸친 유연한 cache 오케스트레이션을 위한 first-class 제어 API. 우리의 평가에 따르면, LMCache를 vLLM과 결합하면 multi-round question answering, 문서 분석과 같은 워크로드 전반에서 throughput이 최대 15배 향상된다. 엔터프라이즈 환경에서의 대규모 LMCache 채택은 우리에게 값진 통찰을 제공한다. 예컨대, remote storage에서 KV cache를 fetch하는 것은 예상 밖으로 prefill 지연에 이롭다는 점, 그리고 업계에서 널리 쓰이는 기법인 context truncation이 prefix cache hit ratio를 절반으로 크게 낮출 수 있다는 점이다. LMCache의 소스 코드는 https://github.com/LMCache/LMCache 에 있다.",
-   "source_url": "https://arxiv.org/abs/2308.14508.",
+   "source_url": "",
    "figures": 16,
    "needs_rewrite": false
   },
@@ -1019,7 +1019,7 @@
    "authors": "Lingfan Yu, Jinkun Lin, Jinyang Li",
    "affil": "New York University",
    "abstract": "대규모 언어 모델(LLM)은 오늘날 매우 인기가 높으며, 이를 효율적으로 서빙하는 것이 중요하다. 기존 LLM 서빙 시스템은 요청 간에 상태를 유지하지 않는다(stateless). 그 결과, LLM이 흔한 사용 방식인 multi-turn conversation에 활용될 때, 점점 길어지는 대화 이력(conversation history)의 로그가 매 turn마다 요청과 함께 서빙 시스템에 의해 처리되어야 하며 이는 중복 처리로 이어진다. 이 논문에서 우리는 multi-turn conversation LLM 서빙에 최적화된 시스템 Pensieve 를 설계한다. Pensieve는 이전에 처리한 이력을 caching하여 중복 처리를 피함으로써 요청 간에 conversation 상태를 유지한다. Pensieve의 multi-tier caching 전략은 GPU와 CPU memory를 모두 활용하여 cache된 데이터를 효율적으로 저장·조회할 수 있다. 또한 Pensieve는 최근의 PagedAttention 커널을 일반화하여, 비연속(non-contiguous) memory에 흩어진 GPU cache와 여러 입력 token 사이의 attention을 지원한다. 우리의 평가에 따르면, Pensieve는 vLLM 및 TensorRT-LLM 대비 1.14–3.0배의 throughput을 달성하며 latency도 크게 줄인다. CCS Concepts: • Software and its engineering → Virtual memory; • Computer systems organization → Data flow architectures. Keywords: LLM Serving, Multi-turn Conversations, Cache",
-   "source_url": "https://arxiv.org/abs/2106.09685",
+   "source_url": "https://arxiv.org/abs/2312.05516",
    "figures": 15,
    "needs_rewrite": false
   },
@@ -1044,7 +1044,7 @@
    "authors": "In Gim 1 , Guojun Chen 1 , Seung-seob Lee 1 , Nikhil Sarda 2 , Anurag Khandelwal 1 , Lin Zhong 1",
    "affil": "1 Yale University, Department of Computer Science · 2 Google",
    "abstract": "우리는 서로 다른 LLM prompt들 사이에서 attention state를 재사용함으로써 대규모 언어 모델(LLM)의 추론을 가속하는 접근법인 Prompt Cache 를 제안한다. 많은 입력 prompt는 system message, prompt template, 문맥으로 제공되는 문서와 같이 겹치는 텍스트 구간을 갖는다. 우리의 핵심 통찰은, 이렇게 자주 등장하는 텍스트 구간의 attention state를 추론 서버에서 미리 계산해 저장해 두면, 해당 구간이 사용자 prompt에 나타날 때 이를 효율적으로 재사용할 수 있다는 것이다. Prompt Cache는 이러한 재사용 가능한 텍스트 구간( prompt module 이라 부른다)을 명시적으로 정의하기 위해 schema를 사용한다. 이 schema는 attention state 재사용 중에 위치 정확성(positional accuracy)을 보장하며, 사용자가 자신의 prompt 안에서 캐싱된 state에 접근할 수 있는 인터페이스를 제공한다. 프로토타입 구현을 사용하여, 우리는 여러 LLM에 걸쳐 Prompt Cache를 평가한다. 우리는 Prompt Cache가 특히 문서 기반 질의응답이나 추천처럼 긴 prompt에서 time-to-first-token latency를 크게 줄임을 보인다. 그 개선폭은 GPU 기반 추론에서 8배, CPU 기반 추론에서 60배에 이르며, 이 모든 것이 출력 정확도를 유지하면서, 그리고 모델 파라미터를 수정할 필요 없이 이루어진다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2311.04934",
    "figures": 8,
    "needs_rewrite": false
   },
@@ -1069,7 +1069,7 @@
    "authors": "Chao Jin 1 , Zili Zhang 1 , Xuanlin Jiang 1 , Fangyue Liu 1 , Xin Liu 2 , Xuanzhe Liu 1 , Xin Jin 1",
    "affil": "1 Peking University · 2 ByteDance Inc.",
    "abstract": "Retrieval-Augmented Generation(RAG)은 대규모 언어 모델(LLM)의 강점과 외부 지식 데이터베이스를 결합하여 다양한 자연어 처리 과제에서 상당한 개선을 보여 왔다. 그러나 RAG는 긴 시퀀스 생성을 유발하여 높은 연산 및 메모리 비용을 초래한다. 우리는 RAG에 특화된 새로운 multilevel 동적 caching 시스템 RAGCache를 제안한다. 우리의 분석은 현재 RAG 시스템을 벤치마킹하여 성능 병목(즉, 지식 주입으로 인한 긴 시퀀스)과 최적화 기회(즉, 지식의 중간 상태 caching)를 짚어낸다. 이러한 통찰을 바탕으로, 우리는 retrieval된 document의 중간 상태를 knowledge tree로 조직하고 이를 GPU 및 host memory 계층에 caching하는 RAGCache를 설계한다. RAGCache는 LLM inference 특성과 RAG의 retrieval 패턴을 인지하는 cache replacement 정책을 제안한다. 또한 retrieval 단계와 inference 단계를 동적으로 겹쳐서 end-to-end latency를 최소화한다. 우리는 RAGCache를 구현하고, 최신 LLM inference 시스템 vLLM과 최신 vector database Faiss 위에서 평가한다. 실험 결과, RAGCache는 Faiss와 통합된 vLLM 대비 time to first token(TTFT)을 최대 4배 줄이고 throughput을 최대 2.1배 향상시킨다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2404.12457",
    "figures": 19,
    "needs_rewrite": false
   },
@@ -1119,7 +1119,7 @@
    "authors": "Yinmin Zhong 1 , Shengyu Liu 1 , Junda Chen 3 , Jianbo Hu 1 , Yibo Zhu 2 , Xuanzhe Liu 1 , Xin Jin 1 , Hao Zhang 3",
    "affil": "1 Peking University 컴퓨터과학부 · 2 StepFun · 3 UC San Diego",
    "abstract": "DistServe는 대규모 언어 모델 (LLM) 의 prefill과 decoding 연산을 분리 (disaggregating) 함으로써 서빙 성능을 향상시킨다. 기존 LLM 서빙 시스템은 두 phase를 같은 GPU에 함께 배치 (colocate) 하고, 모든 사용자와 요청에 걸쳐 prefill과 decoding의 연산을 batch로 묶는다. 우리는 이 전략이 강한 prefill-decoding 간섭 (interference) 을 일으킬 뿐 아니라, 두 phase의 자원 할당과 parallelism 계획을 서로 결합시켜 버린다는 것을 발견했다. LLM 애플리케이션은 각 phase별 개별 지연을 중시하는 경우가 많다. 즉 prefill phase에 대해서는 time to first token (TTFT) 을, decoding phase에 대해서는 각 요청의 time per output token (TPOT) 을 중시한다. 엄격한 지연 요구사항이 존재할 때, 기존 시스템은 둘 중 하나의 지연을 우선시할 수밖에 없거나, 둘 다 만족하기 위해 연산 자원을 과다 프로비저닝 (over-provision) 해야 한다. DistServe는 prefill과 decoding 연산을 서로 다른 GPU에 할당함으로써 prefill-decoding 간섭을 제거한다. 애플리케이션의 TTFT와 TPOT 요구사항이 주어지면, DistServe는 각 phase에 맞게 자원 할당과 parallelism 전략을 함께 최적화한다. DistServe는 또한 서빙 클러스터의 대역폭에 맞추어 두 phase를 배치 (place) 함으로써, 분리로 인해 발생하는 통신을 최소화한다. 그 결과 DistServe는 LLM 서빙 성능을 크게 향상시켜, 각 GPU가 TTFT와 TPOT 제약을 모두 만족하면서 처리할 수 있는 최대 요청률을 높인다. 평가 결과, DistServe는 다양한 인기 LLM, 애플리케이션, 지연 요구사항에 대해 최신 시스템 대비 90% 이상의 요청에 대해 지연 제약을 지키면서 7.4배 더 많은 요청을 처리하거나 12.6배 더 엄격한 SLO를 만족시킬 수 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2401.09670",
    "figures": 14,
    "needs_rewrite": false
   },
@@ -1144,7 +1144,7 @@
    "authors": "Yongtong Wu 1,3 , Shaoyuan Chen 2,3 , Yinmin Zhong 1,3 , Rilin Huang 1 , Yixuan Tan 3 , Wentao Zhang 3 , Liyue Zhang 3 , Shangyan Zhou 3 , Yuxuan Liu 3 , Shunfeng Zhou 3 , Mingxing Zhang 2 , Xin Jin 1 , Panpan Huang 3",
    "affil": "1 베이징대학교 컴퓨터과학부 · 2 칭화대학교 · 3 DeepSeek-AI",
    "abstract": "다중 턴(multi-turn) 에이전트 LLM 추론의 성능은 점점 더 연산이 아니라 KV-Cache의 스토리지 I/O 에 의해 좌우되고 있다. 널리 쓰이는 분리형(disaggregated) 아키텍처에서, 거대한 KV-Cache를 외부 스토리지에서 prefill 엔진으로 적재하는 과정은 근본적인 불균형을 만든다. 즉, prefill 엔진의 스토리지 NIC는 대역폭이 포화되는 반면 decode 엔진의 스토리지 NIC는 놀고 있다. 이 비대칭은 전체 시스템 처리량을 심각하게 제약한다. 본 논문은 이중 경로(dual-path) KV-Cache 적재 를 도입하여 이 병목을 깨뜨리는 추론 시스템 DualPath 를 제안한다. 기존의 스토리지→prefill 경로 외에, DualPath는 KV-Cache를 먼저 decode 엔진으로 적재한 뒤 연산 네트워크의 RDMA를 통해 prefill 엔진으로 효율적으로 전송하는 새로운 스토리지→decode 경로를 가능하게 한다. DualPath는 본질적으로 네트워크 혼잡을 피하고 지연에 민감한 모델 실행 통신과의 간섭을 회피하는 이 최적화된 데이터 경로를, prefill과 decode 엔진 사이의 부하를 동적으로 균형 잡는 전역 스케줄러와 결합한다. 세 가지 모델에서 현실적인 에이전트 워크로드로 수행한 평가에 따르면, DualPath는 자체 추론 시스템에서 오프라인 추론 처리량을 최대 1.87배 향상시킨다. 또한 SLO를 위반하지 않으면서 온라인 서빙 처리량을 평균 1.96배 향상시킬 수 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2602.21548",
    "figures": 15,
    "needs_rewrite": false
   },
@@ -1169,7 +1169,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "",
+   "source_url": "https://docs.nvidia.com/dynamo/dev/user-guides/disaggregated-serving",
    "figures": 0,
    "needs_rewrite": false
   },
@@ -1220,7 +1220,7 @@
    "authors": "",
    "affil": "",
    "abstract": "",
-   "source_url": "https://arxiv.org/abs/1909.08053",
+   "source_url": "",
    "figures": 11,
    "needs_rewrite": false
   },
@@ -1297,7 +1297,7 @@
    "authors": "Zhuoping Yang 1 , Jinming Zhuang 1 , Xingzhen Chen 1 , Alex K. Jones 2 , Peipei Zhou 1",
    "affil": "1 Brown University · 2 Syracuse University",
    "abstract": "GPU는 연산 집약적 애플리케이션에 핵심적이지만, 추천 시스템(recommender system), 그래프 분석, 데이터 분석 같은 신흥 워크로드는 종종 GPU 메모리 용량을 초과한다. 기존 해법은 GPU가 CPU DRAM이나 SSD를 외부 메모리로 사용할 수 있게 하며, GPU 중심(GPU-centric) 접근은 GPU 스레드가 NVMe 요청을 직접 발행하게 하여 CPU 개입을 더욱 회피한다. 그러나 현재의 GPU 중심 접근은 동기(synchronous) I/O 를 채택하여, 긴 통신 지연 동안 스레드가 멈추도록(stall) 강제한다. 우리는 deadlock 위험을 제거하고 유연한 HBM 기반 소프트웨어 캐시를 통합한 경량 비동기 GPU 중심 I/O 라이브러리 AGILE 을 제안한다. AGILE은 연산과 I/O를 겹쳐(overlap), computation-to-communication ratio(CTC)가 다양한 여러 워크로드에서 성능을 최대 1.88배까지 향상시킨다. DLRM에서 BaM과 비교하면 AGILE은 효율적 설계와 overlapping을 통해 최대 1.75배 speedup을 달성한다. 그래프 애플리케이션에서 AGILE은 소프트웨어 캐시 오버헤드를 최대 3.12배, NVMe I/O 오버헤드를 최대 2.85배 줄인다. 또한 AGILE은 스레드당 register 사용량을 최대 1.32배 낮춘다. 우리는 사용자가 AGILE을 활용하고 다양한 애플리케이션에서 구성 요소를 커스터마이징할 수 있도록 상세한 가이드와 함께 AGILE을 오픈소스로 공개한다. https://github.com/arc-research-lab/AGILE",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2504.19365",
    "figures": 12,
    "needs_rewrite": false
   },
@@ -1347,7 +1347,7 @@
    "authors": "Nurlan Nazaraliyev, Elaheh Sadredini, Nael Abu-Ghazaleh",
    "affil": "University of California, Riverside",
    "abstract": "그래픽 처리 장치(GPU)는 막대한 병렬성과 큰 메모리 대역폭을 활용하여 멀티미디어 렌더링, 크립토 마이닝, 딥러닝, 자연어 처리 같은 고성능 연산 애플리케이션을 지원한다. 이런 애플리케이션이 요구하는 모델과 데이터셋의 크기가 점점 커지면서 단일 GPU의 메모리 용량을 위협하고 상당한 성능 오버헤드를 유발한다. 이 문제를 해결하려면 프로그래머가 데이터를 분할하고 GPU 안팎으로 수동 전송해야 한다. 이 방식은 프로그래머가 애플리케이션을 세심하게 튜닝해야 하며, 딥러닝·추천 시스템·그래프 애플리케이션처럼 접근 패턴이 불규칙한 워크로드에는 비현실적일 수 있다. 프로그래밍 용이성을 위해 unified virtual memory(UVM) 같은 프로그래밍 추상화를 쓸 수 있는데, 이는 시스템 전체에 걸쳐 가상으로 통합된 메모리 공간을 만들고 접근이 일어나는 대로 데이터를 온디맨드로 투명하게 이동시킨다. 그러나 UVM은 OS 개입의 오버헤드와, 특히 GPU 메모리가 oversubscribe될 때 다수의 전송 요청을 생성함으로 인한 비효율을 초래한다. 본 논문은 CPU/OS를 개입시키지 않고 RDMA-capable 네트워크 장치를 사용하여 가상 메모리 시스템을 구성하는 GPU 메모리 관리 시스템 GPUVM 을 제안한다. GPUVM은 GPU 애플리케이션을 위한 on-demand paging을 가능하게 하고, 메모리 관리와 page migration을 GPU 스레드에 의존한다. CPU 칩셋은 GPU가 주도하는 메모리 관리를 지원하지 않으므로, 우리는 GPU로/에서 투명한 page migration을 촉진하기 위해 network interface card를 사용한다. GPUVM은 latency-bound 애플리케이션에서 UVM 대비 최대 4배 높은 성능을 달성하는 동시에, 사용자가 메모리 전송을 직접 관리할 필요가 없는 접근성 좋은 프로그래밍 추상화를 제공한다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2411.05309",
    "figures": 16,
    "needs_rewrite": false
   },
@@ -1372,7 +1372,7 @@
    "authors": "Hakbeom Jang, Younghoon Min, Sunwoong Kim, Taeyoung Ahn, Hanyee Kim, Youngpyo Joo, Hoshik Kim, Jongryool Kim",
    "affil": "Memory Systems Research, SK hynix",
    "abstract": "대규모 언어 모델(LLM)에서 agentic·long-context 워크로드로의 급격한 전환은, 산업계를 개별 서버의 용량 한계 너머로 밀어붙여 TB 규모의 context 상태를 다루기 위한 분리형(disaggregated) 공유 스토리지로 향하게 하고 있다. 이 흐름은 분산 클러스터 전반에 걸쳐 누적된 추론 상태를 외부화·공유하도록 설계된 특화된 공유 context 계층의 등장을 낳았다. just-a-bunch-of-flash(JBOF) 아키텍처 내부의 data processing unit(DPU)로 offloading하면 NVMe-over-fabrics(NVMe-oF) target 처리를 가속할 수 있지만, 정교한 소프트웨어 수준 최적화의 필요성과 비용 효율성 부담은 여전히 크다. 따라서 이 공유 context 인프라를 확장하기 위한 이상적 아키텍처는 아직 활발히 탐색 중인 영역이다. 본 논문에서 우리는 ITME(Inference Tiered Memory Expansion) 를 제안한다. ITME는 CXL-hybrid 메모리를 활용하여 거대한 TB 규모의 byte-addressable 원격 메모리 확장을 제공한다. 이 접근은 비용 효율적 확장을 가능하게 하고 직접적인 byte-addressability를 통해 소프트웨어 스택을 단순화하여, 공유 context 인프라의 과제를 효과적으로 해결한다. 우리의 핵심 통찰은, 방대한 모델 weight와 prefix cache의 결정적(deterministic) 접근 패턴 덕분에 시스템이 메모리-스토리지 계층 사이의 데이터 이동을 선제적으로 관리할 수 있다는 것이다. 이 예측 가능성을 활용하여 ITME는 pipeline 방식의 multi-tier DMA 기반 prefetching을 구현하며, 이는 CXL-hybrid 메모리 장치에서 GPU 메모리로의 매끄러운 데이터 이동을 직접 조율한다. 우리는 프로덕션급 SK hynix CMM과 PCIe Gen5 NVMe SSD로 ITME의 성능 잠재력을 평가하여 검증하고, 나아가 FPGA 기반 하드웨어 프로토타입으로 기능적 실현 가능성을 입증한다. 종합적으로 ITME는, host 메모리 한계를 넘어서는 대용량 KV cache footprint를 수용하도록 추가적인 원격 메모리 확장을 제공함으로써 기존 CPU-offloading을 개선하며, 최대 35.7%의 throughput 향상을 달성한다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2606.12556",
    "figures": 14,
    "needs_rewrite": false
   },
@@ -1423,7 +1423,7 @@
    "authors": "Jeongmin Hong † , Sungjun Cho † , Geonwoo Park † , Wonhyuk Yang † , Young-Ho Gong ⋆ , Gwangsun Kim †",
    "affil": "† POSTECH · ⋆ Soongsil University | Gwangsun Kim이 교신저자다.",
    "abstract": "우리는 고용량 Storage-Class Memory(SCM)와 DRAM cache로 GPU의 메모리 용량 한계를 극복하는 방안을 제안한다. SCM으로 메모리 용량을 대폭 늘리면, GPU는 메모리 oversubscription이 필수인 워크로드에서 HBM보다 더 큰 memory footprint를 담을 수 있어 상당한 속도 향상을 얻는다. 그러나 SCM의 latency와 bandwidth(BW) 한계를 해결하고, 비용 오버헤드를 최소화하며, GPU의 특성을 고려하도록 DRAM cache를 세심하게 설계해야 한다. 방대한 수의 GPU thread가 DRAM cache를 쉽게 thrash하여 성능을 떨어뜨릴 수 있으므로, 우리는 먼저 SCM을 사용하는 GPU의 다차원적 메모리 접근 특성을 고려하여 성능 효용이 낮은 데이터에 대해 DRAM을 우회(bypass)하는, GPU를 위한 SCM-aware DRAM cache bypass policy를 제안한다. 또한 DRAM cache probe traffic을 줄이고 최소 비용 오버헤드로 유효 DRAM BW를 높이기 위해, L2 cache의 일부를 DRAM cacheline tag 캐싱 용도로 전용(repurpose)하는 Configurable Tag Cache(CTC)를 제안한다. CTC가 쓰는 L2 용량은 사용자가 적응적으로 조정할 수 있다. 나아가 CTC miss로 인한 DRAM cache probe traffic을 최소화하기 위해, 우리의 Aggregated Metadata-In-Last-column(AMIL) DRAM cache 조직은 한 row 내 모든 DRAM cacheline tag를 하나의 column에 함께 배치한다. AMIL은 Tag-And-Data(TAD) 조직을 쓰는 기존 DRAM cache 구현과 달리 완전한 ECC 보호를 유지한다. 추가로 전력 소비를 억제하기 위한 SCM throttling과, 워크로드의 memory footprint에 적응하기 위한 SCM의 SLC/MLC 모드 활용을 제안한다. 우리의 기법은 서로 다른 DRAM·SCM 장치에 적용할 수 있으나, 본 논문에서는 고성능을 위해 DRAM die 위에 SCM die를 쌓는 Heterogeneous Memory Stack(HMS) 조직에 초점을 둔다. HBM 대비 HMS는 성능을 최대 12.5배(전체 2.9배) 향상시키고 에너지를 최대 89.3%(전체 48.1%) 줄인다. 기존 연구 대비 DRAM cache probe traffic과 SCM write traffic을 각각 91–93%, 57–75% 줄인다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2403.09358",
    "figures": 22,
    "needs_rewrite": false
   },
@@ -1473,7 +1473,7 @@
    "authors": "Zongze Li, Jingyu Liu, Zhen Xu, Yineng Zhang, Tahseen Rabbani, Ce Zhang",
    "affil": "University of Chicago (Yineng Zhang — Independent Researcher)",
    "abstract": "PD 분리에서 KV 전송은 단방향(P→D) 이므로, 지난 턴 응답의 KV가 이미 decode 노드에 있어도 prefill 노드는 그것을 쓸 수 없고 매 턴 대화 전체를 재계산해 되돌려 보낸다. 새 토큰만 계산하는 append-prefill 은 decode를 거의 방해하지 않으므로(prefill 1개 기준 TPOT 저하 ~2% 대 full prefill ~48%), 후속 턴을 KV를 이미 가진 decode 노드에서 로컬로 처리하도록 라우팅한다. 합성 스윕에서 static x=1 스위치가 Turn 2 TTFT를 48–73% 줄이고, 실 트래픽에서 PPD가 Turn 2+ TTFT를 평균 ~68% 줄인다.",
-   "source_url": "https://arxiv.org/abs/2403.19708",
+   "source_url": "https://arxiv.org/abs/2603.13358",
    "figures": 3,
    "needs_rewrite": false
   },
@@ -1550,7 +1550,7 @@
    "authors": "Ritik Raj 1,∗ , Souvik Kundu 2,∗ , Ishita Vohra 1 , Hong Wang 2 , Tushar Krishna 1",
    "affil": "1 Georgia Institute of Technology · 2 Intel · 미국 · ( ∗ 교신저자: Ritik Raj, Souvik Kundu)",
    "abstract": "Agentic AI 서빙은 단일(monolithic) LLM 기반 추론을, 계획을 세우고(plan), 도구를 호출하고(call tools), 추론을 수행하며(reasoning), 즉석에서 적응(adapt on the fly)할 수 있는 자율적 문제 해결자로 전환한다. 다양한 태스크 실행 요구 때문에 이러한 서빙은 이질적(heterogeneous) CPU–GPU 시스템에 크게 의존하며, agentic 능력을 담당하는 외부 도구(tool)의 대부분은 CPU에서 실행되거나 CPU에 의해 orchestration된다. 그 역할을 더 깊이 이해하기 위해, 본 논문은 그동안 크게 간과되어 온 CPU 중심(CPU-centric) 관점에서 agentic AI 워크로드가 유발하는 시스템 병목을 characterize하고 분석하는 것을 목표로 한다. 우리는 먼저 agentic AI 실행의 compile-time characterization을 제시하고, 알고리즘적 다양성을 포착하는 대표 워크로드를 선정한다. 이어 대표 워크로드에 대한 runtime characterization을 수행하여, 두 개의 서로 다른 하드웨어 시스템에서 end-to-end latency와 throughput을 분석함으로써 각각의 아키텍처적 병목을 분리해 낸다. 이 병목에 대한 통찰을 바탕으로, 우리는 마지막으로 두 가지 scheduling 최적화, 즉 ① CPU-Aware Overlapped Micro-Batching(COMB)와 ② Mixed Agentic Scheduling(MAS)을 각각 동종(homogeneous) 및 이종(heterogeneous) agentic 워크로드에 대해 제시한다. 구체적으로 이 방법들은 CPU-GPU 동시 활용도(concurrent utilization)를 향상시키는 동시에 이종 실행에서의 편향된 자원 할당을 줄이도록 최적화한다. 두 하드웨어 시스템에서의 실험 평가는, COMB가 독립(standalone) 동종 워크로드 실행에서 최대 1.7배 낮은 P50 latency를, 동종 open-loop 부하에서 최대 3.9배/1.8배 낮은 service/total latency를 산출함으로써 그 효능을 입증함을 보여준다. 아울러 이종 open-loop 부하에 대해, MAS는 소수(minority) request-type의 total latency를 P50/P90 백분위에서 각각 최대 2.37배/2.49배 줄일 수 있다.",
-   "source_url": "https://arxiv.org/abs/2504.11750",
+   "source_url": "https://arxiv.org/abs/2511.00739",
    "figures": 12,
    "needs_rewrite": false
   },
@@ -1575,7 +1575,7 @@
    "authors": "Yuxing Xiang 1,2 , Xue Li 2 , Kun Qian 2 , Yan Zhang 1 , Wenyuan Yu 2 , Ennan Zhai 2 , Xin Jin 1 , Jingren Zhou 2",
    "affil": "1 Peking University 컴퓨터과학부 · 2 Alibaba Group",
    "abstract": "대규모 언어 모델(LLM)이 널리 채택되면서 LLM 추론 요청을 서빙하는 일은 점점 더 중요한 과제가 되었고, 활발한 연구가 이어지고 있다. 이 과정에서 실제(practical) workload는 필수적인 역할을 한다. 서빙 기법과 시스템을 동기 부여하고 benchmark하는 데 핵심적이기 때문이다. 그러나 포괄적인 workload 특성 분석이 부재하여, 실제 LLM 서빙 workload에 대한 기존 이해는 제한적이다. 선행 분석들은 규모(scale)와 범위(scope) 면에서 여전히 불충분하며, 복잡하게 얽힌 workload 특성을 온전히 포착하지 못한다. 이 논문에서 우리는 전 세계에 걸친 클라우드 LLM 서빙 서비스에서 수집한 LLM 서빙 workload를 심층적으로 특성 분석하여 이 공백을 메운다. 우리의 분석은 language 모델뿐 아니라 새롭게 부상한 multimodal 및 reasoning 모델까지 포괄하며, 각 경우에서 중요한 새 발견을 밝혀낸다. 나아가 우리는 이러한 발견을 바탕으로, workload를 client 단위로 조합하여 현실적인 LLM 서빙 workload를 생성하는 원리적(principled) 프레임워크 ServeGen을 제안한다. 실제 use case를 통해, ServeGen이 naive한 workload 생성 방식에 비해 더 정확한 성능 benchmark를 달성하고, 그러지 않았으면 간과되었을 새로운 설계 시사점을 드러냄을 검증한다. ServeGen은 https://github.com/alibaba/ServeGen 에서 오픈소스로 공개되어 있다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2505.09999",
    "figures": 21,
    "needs_rewrite": false
   },
@@ -1600,7 +1600,7 @@
    "authors": "Kan Zhu 1 , Mathew Jacob 1 , Chenxi Ma 1,2,∗ , Yi Pan 3 , Stephanie Wang 1 , Arvind Krishnamurthy 1 , Baris Kasikci 1",
    "affil": "1 University of Washington · 2 Wuhan University of Technology · 3 Shanghai Jiao Tong University · ( ∗ 워싱턴 대학 인턴 기간 중 수행)",
    "abstract": "coding agent는 agentic LLM의 주요 응용으로 빠르게 자리 잡고 있으나, 이를 효율적으로 서빙하는 것은 여전히 어려운 과제다. 이 과제를 진전시키려면 실제 워크로드 패턴을 이해해야 하지만, 그러한 분석에 필요한 데이터는 대부분 부재하다. 기존의 공개 trace와 benchmark는 서빙 시스템 분석을 위한, 여러 agent와 모델 계열에 걸친 실제 일상적 coding-agent 사용을 담아내지 못한다. 이 공백을 메우는 데 기여하고자, 우리는 약 4,300개의 coding-agent session으로 이루어진 trace를 수집·공개한다. 이 trace는 우리가 Claude Code와 Codex를 일상적으로 사용하며 얻은 약 350,000개의 LLM step과 430,000개의 tool call을 포함한다. 분석 결과, coding-agent 워크로드는 긴 자율 loop, 짧은 출력을 동반한 긴 context, 다양하고 heavy-tailed한 tool call, 그리고 높지만 완벽하지는 않은 prefix cache hit rate를 특징으로 한다. 이러한 발견은 서빙 최적화의 구체적 기회, 즉 더 낮은 오버헤드의 tool calling, append 길이를 고려한 prefill, 의미 인식(semantic-aware) tool latency 예측, 그리고 사람의 페이스로 발생하는 유휴 간격(gap)을 둘러싼 개선된 KV cache 관리를 가리킨다. 우리는 데이터셋, trace 수집 파이프라인, 분석 코드를 https://github.com/uw-syfi/TraceLab.git 에서 공개하며, 프로젝트 웹사이트는 https://tracelab.cs.washington.edu 이다.",
-   "source_url": "",
+   "source_url": "https://arxiv.org/abs/2606.30560",
    "figures": 12,
    "needs_rewrite": false
   },

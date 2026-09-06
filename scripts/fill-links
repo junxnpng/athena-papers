@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""미러된 논문 페이지에서 원문 링크를 찾아 data/papers.json 의 source_url 을 채운다.
+URL 을 지어내지 않는다 — 미러 페이지에 실제로 있는 링크만 쓴다.
+
+  scripts/fill-links [--dry-run]
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+MIRROR = P.RAW_DIR / "site" / "papers"
+LINK = re.compile(r'<a[^>]+href="(https?://[^"]+)"[^>]*>(.*?)</a>', re.S | re.I)
+
+# 학술 원문 — 도메인만 보고 고른다
+SCHOLARLY = ["arxiv.org/abs/", "doi.org/", "usenix.org/", "dl.acm.org/", "ieeexplore.ieee.org/",
+             "proceedings.mlsys.org/", "openreview.net/", "aclanthology.org/", "computer.org/"]
+# 블로그·문서가 원문인 자료 — venue 문자열의 힌트와 도메인을 맞춘다
+VENUE_HINT = [("nvidia", "nvidia.com"), ("redis", "redis.io"), ("medium", "medium.com"),
+              ("vllm", "blog.vllm.ai"), ("aws", "aws.amazon.com"), ("neuron", "amazon.com"),
+              ("machinelearningmastery", "machinelearningmastery.com"), ("huggingface", "huggingface.co"),
+              ("pytorch", "pytorch.org"), ("langchain", "langchain.com"), ("colfax", "colfax-intl.com")]
+# 원문이 아닌 부수 링크
+NOISE = ("github.com", "papers.cool", "localhost", "youtube.com", "twitter.com", "x.com",
+         "wikipedia.org", "semanticscholar.org", "scholar.google", "creativecommons.org")
+
+
+def candidates(page: str):
+    seen = []
+    for url, label in LINK.findall(page):
+        url = url.rstrip(".,;)")
+        if urllib.parse.urlparse(url).netloc.startswith("10.") or url in [u for u, _ in seen]:
+            continue
+        seen.append((url, re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', label)).strip()))
+    return seen
+
+
+def pick(cands, venue: str):
+    usable = [(u, l) for u, l in cands if not any(n in u for n in NOISE)]
+    for key in SCHOLARLY:
+        for u, _ in usable:
+            if key in u:
+                return u, "학술"
+    v = (venue or "").lower()
+    for hint, dom in VENUE_HINT:
+        if hint in v:
+            for u, _ in usable:
+                if dom in u:
+                    return u, "venue 일치"
+    for u, label in usable:  # 라벨이 원문을 가리키는 링크
+        if "↗" in label or "원문" in label:
+            return u, "라벨"
+    return "", ""
+
+
+ARXIV_API = "http://export.arxiv.org/api/query"
+
+
+ABBREV = [(r"\bllms\b", "large language models"), (r"\bllm\b", "large language model"),
+          (r"\bgpus\b", "graphics processing units"), (r"\bkv\b", "key value")]
+
+
+def norm_title(t: str) -> str:
+    t = re.sub(r"\([^)]*\)", " ", t or "")  # 제목 뒤 소속·출처 괄호는 제목이 아니다
+    t = re.sub(r"[^a-z0-9 ]+", " ", t.lower())
+    for pat, full in ABBREV:  # 약어 표기 차이는 같은 제목이다 (LLMs ↔ Large Language Models)
+        t = re.sub(pat, full, t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def title_name(t: str) -> str:
+    """제목이 가리키는 대상의 이름 — 콜론 앞(예: Mosaic), 콜론이 없으면 앞 두 단어."""
+    a = norm_title(t)
+    head = (t or "").split(":")[0]
+    if head and head != t and len(norm_title(head).split()) <= 4:
+        return norm_title(head)
+    return " ".join(a.split()[:2])
+
+
+def title_similarity(want: str, got: str) -> float:
+    a, b = norm_title(want), norm_title(got)
+    if not a or not b:
+        return 0.0
+    if a == b:
+        return 1.0
+    ta, tb = set(a.split()), set(b.split())
+    return len(ta & tb) / float(len(ta | tb))
+
+
+def title_verdict(want: str, got: str) -> str:
+    """same = 같은 논문 · related = 이름은 같고 제목 표기가 다름(같은 논문의 다른 버전일 수 있다) · different = 다른 논문."""
+    if title_similarity(want, got) >= 0.85:
+        return "same"
+    wn, gn = title_name(want), title_name(got)
+    return "related" if wn and wn == gn else "different"
+
+
+def title_matches(want: str, got: str) -> bool:
+    return title_verdict(want, got) == "same"
+
+
+def arxiv_title(arxiv_id: str, timeout: int = 20):
+    """arXiv id → 제목. 조회 실패는 None."""
+    q = urllib.parse.urlencode({"id_list": re.sub(r"v\d+$", "", arxiv_id), "max_results": "1"})
+    try:
+        with urllib.request.urlopen("%s?%s" % (ARXIV_API, q), timeout=timeout) as r:
+            xml = r.read()
+    except Exception:  # noqa: BLE001
+        return None
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    for e in ET.fromstring(xml).findall("a:entry", ns):
+        t = (e.findtext("a:title", "", ns) or "").strip()
+        if t:
+            return re.sub(r"\s+", " ", t)
+    return None
+
+
+def arxiv_lookup(title: str, timeout: int = 20):
+    """arXiv 공개 API 에서 제목으로 찾는다. 제목이 일치할 때만 (url, 원제) 를 돌려준다."""
+    STOP = {"the", "and", "for", "with", "from", "via", "using", "into", "its", "our", "are",
+            "not", "but", "all", "can", "you", "your", "how", "why", "what", "that", "this"}
+    words = [w for w in norm_title(title).split() if len(w) > 2 and w not in STOP][:8]
+    if not words:
+        return None
+    q = urllib.parse.urlencode({"search_query": " AND ".join('ti:"%s"' % w for w in words),
+                                "max_results": "10", "start": "0"})
+    try:
+        with urllib.request.urlopen("%s?%s" % (ARXIV_API, q), timeout=timeout) as r:
+            xml = r.read()
+    except Exception:  # noqa: BLE001
+        return None
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    for e in ET.fromstring(xml).findall("a:entry", ns):
+        got = (e.findtext("a:title", "", ns) or "").strip()
+        idu = (e.findtext("a:id", "", ns) or "").strip()
+        if idu and title_matches(title, got):
+            return re.sub(r"v\d+$", "", idu.replace("http://", "https://")), got
+    return None
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--arxiv", action="store_true", help="페이지에 링크가 없으면 원제로 arXiv 공개 API 를 조회한다 (제목 일치할 때만 채운다)")
+    a = ap.parse_args(argv)
+    data = P.load()
+    filled, still = [], []
+    for p in data["papers"]:
+        if p["source_url"]:
+            continue
+        f = MIRROR / p["id"] / "index.html"
+        if not f.exists():
+            still.append((p, "미러 없음"))
+            continue
+        url, why = pick(candidates(f.read_text(encoding="utf-8", errors="replace")), p["venue"])
+        if url and "arxiv.org/abs/" in url and p["title_en"]:
+            # 페이지에서 주운 arXiv 링크는 참고문헌일 수 있다 — 제목이 맞을 때만 쓴다
+            aid = url.rstrip(".").rsplit("/", 1)[-1]
+            got = arxiv_title(aid)
+            time.sleep(3)
+            if got is None or not title_matches(p["title_en"], got):
+                url, why = "", ""
+        if not url and a.arxiv and p["title_en"]:
+            hit = arxiv_lookup(p["title_en"])
+            time.sleep(3)  # arXiv API 권장 간격
+            if hit:
+                url, why = hit[0], "arXiv 조회"
+        if url:
+            p["source_url"] = url
+            filled.append((p, url, why))
+        else:
+            still.append((p, "후보 없음"))
+    for p, url, why in filled:
+        print("  + %-28s %-8s %s" % (p["id"], why, url[:78]))
+    for p, why in still:
+        print("  ? %-28s %-8s %s" % (p["id"], why, p["venue"][:40]))
+    print("채움 %d편, 남음 %d편" % (len(filled), len(still)))
+    if not a.dry_run and filled:
+        P.dump(data)
+        print("→ data/papers.json 갱신")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
