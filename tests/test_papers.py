@@ -12,7 +12,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import papers as P  # noqa: E402
 
-P.configure_terms(hard=["SecretProj", "Acme"])  # 실제 이름은 data/raw 에만 — 테스트는 가짜 이름으로
+
+def setUpModule():  # 실제 이름은 data/raw 에만 — 테스트는 가짜 이름으로. 모듈마다 자기 목록을 다시 건다
+    P.configure_terms(hard=["SecretProj", "Acme"])
 
 
 def _load_build():

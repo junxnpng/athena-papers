@@ -1,0 +1,5 @@
+{
+  "_doc": "글에 실을 그림의 허용 목록. scripts/rules.py 가 검사한다. kind 는 architecture|method|overview|algorithm|workflow 만 — 결과 그래프는 넣지 않는다. 원본 그림은 논문 license 가 CC 계열일 때만, 아니면 redrawn: true 로 다시 그린 것만.",
+  "_example": {"paper": "kv-cache/strata", "figure": 2, "kind": "architecture", "file": "figures/strata-fig2.png", "credit": "Figure 2, Strata (arXiv 2508.18572), CC BY 4.0", "redrawn": false},
+  "figures": []
+}

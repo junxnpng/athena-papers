@@ -9,10 +9,11 @@
 - `scripts/pull` — 원본 → raw → 정본. `--from-raw` 는 네트워크 없이 정본만 재생성.
 - `scripts/mirror` — 원본 논문 페이지와 그림을 `data/raw/site/` 에 통째로 보관.
 - `scripts/build` — 정본 → `site/index.html` (단일 파일, 외부 자원 없음). `--check` 는 최신 여부만.
-- `scripts/check` — 검증기 전부(스키마 + 사이트 최신 + unittest). `.harness/verify` 가 이것을 부른다.
+- `scripts/check` — 검증기 전부(스키마 + 공개 원칙 + 사이트 최신 + unittest). `.harness/verify` 가 이것을 부른다.
 - `.harness/` — 하네스 계약 파일. 밤 작업은 오프라인 리프만(요약 재작성·학회 정규화).
 
 ## 규칙
+- 공개 원칙 7개는 `docs/PRINCIPLES.md`. 지침이 아니라 검증기가 강제한다 — `scripts/rules.py`(글·그림), `scripts/papers.py`(정본).
 - python3 stdlib 만. `#!/bin/sh` POSIX 만.
 - `site/` 는 파생물 — 손으로 고치지 않는다. 데이터를 고치고 `scripts/build`.
 - `data/raw/` 는 커밋하지 않는다. 원본 주소와 금지 문구 목록은 코드에 적지 않고 `data/raw/` 의 파일로 둔다.

@@ -68,7 +68,30 @@ EDITORIAL_FIELDS = ("summary", "badge", "chips", "subcategory", "title_ko", "tit
 
 PUBLIC_FIELDS = ["id", "hub", "subcategory", "title_ko", "title_en", "kind", "badge", "venue", "year",
                  "venue_short", "venue_type", "chips", "summary", "authors", "affil", "abstract",
-                 "source_url", "figures", "needs_rewrite"]
+                 "source_url", "license", "figures", "needs_rewrite"]
+
+# 원문 라이선스 — 그림을 그대로 실어도 되는가를 코드가 판정한다 (docs/PRINCIPLES.md 원칙 3)
+EMBED_OK_PREFIXES = ("cc-by", "cc0")          # CC 계열: 출처 표기하면 그대로 실어도 된다 (NC·ND 는 비상업·무수정 조건)
+EMBED_NO_PREFIXES = ("arxiv-nonexclusive",)    # 저자 보유, 재사용 허락 없음 — 다시 그린다
+FIGURE_KINDS_OK = ("architecture", "method", "overview", "algorithm", "workflow")
+FIGURE_KINDS_NO = ("result", "results", "graph", "plot", "chart", "benchmark", "eval", "evaluation")
+_ARXIV_RE = re.compile(r"https?://arxiv\.org/abs/")
+_HANGUL_RE = re.compile(r"[\uac00-\ud7a3]")
+SUMMARY_MAX_CHARS = 8000  # 요약이지 번역이 아니다 — 본문(한글 번역 평균 3.3만 자)의 1/4 을 넘으면 거부
+
+
+def is_arxiv(url: str) -> bool:
+    return bool(_ARXIV_RE.match(url or ""))
+
+
+def embed_allowed(license_code: str) -> bool:
+    """이 라이선스의 그림을 출처 표기만으로 그대로 실어도 되는가."""
+    lc = (license_code or "").lower()
+    return lc.startswith(EMBED_OK_PREFIXES)
+
+
+def has_hangul(text: str) -> bool:
+    return bool(_HANGUL_RE.search(text or ""))
 
 _SENT_SPLIT = re.compile(r"(?<=[.다\)])\s+(?=\S)")
 
@@ -153,6 +176,7 @@ def scrub_paper(raw: dict) -> dict:
         "affil": raw.get("affil", ""),
         "abstract": abstract,
         "source_url": raw.get("source_url") or derive_source_url(venue, raw.get("links", [])),
+        "license": raw.get("license", ""),
         "figures": raw.get("figures", 0),
         "needs_rewrite": cut,
     }
@@ -174,7 +198,7 @@ def build_public(raw: dict) -> dict:
 
 def merge_public(old: dict, new: dict) -> dict:
     """재추출 시 사람이 손본 필드(요약 재작성·venue 정규화·원문 링크)를 잃지 않는다."""
-    keep = ("summary", "badge", "chips", "venue_short", "venue_type", "year", "source_url", "needs_rewrite")
+    keep = ("summary", "badge", "chips", "venue_short", "venue_type", "year", "source_url", "license", "needs_rewrite")
     prev = {p["id"]: p for p in old.get("papers", [])}
     for p in new["papers"]:
         o = prev.get(p["id"])
@@ -183,7 +207,7 @@ def merge_public(old: dict, new: dict) -> dict:
         if o.get("needs_rewrite") is False and p.get("needs_rewrite"):
             for k in ("summary", "badge", "chips", "needs_rewrite"):
                 p[k] = o[k]
-        for k in ("venue_short", "venue_type", "year", "source_url"):
+        for k in ("venue_short", "venue_type", "year", "source_url", "license"):
             if o.get(k) and not p.get(k):
                 p[k] = o[k]
     return new
@@ -241,6 +265,8 @@ def validate(data: dict, strict_rewrite: bool = False, strict_venue: bool = Fals
             field = path.split(".")[0].split("[")[0]
             if is_internal(s, editorial=field in EDITORIAL_FIELDS):
                 problems.append("%s: 내부 맥락이 공개 필드에 남아 있음 (%s)" % (pid, path))
+        if is_arxiv(p.get("source_url", "")) and not p.get("license"):
+            problems.append("%s: arXiv 원문인데 license 가 비어 있다 — scripts/fill-licenses" % pid)
         if strict_rewrite and p.get("needs_rewrite"):
             problems.append("%s: needs_rewrite — 요약을 아직 다시 쓰지 않았다" % pid)
         if strict_venue:

@@ -51,6 +51,9 @@ h3.sub .n{font-weight:normal;margin-left:6px}
 .card .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
 .chip{background:var(--chip);color:var(--chipfg);padding:2px 8px;border-radius:999px;white-space:nowrap}
 .chip.v{background:var(--hl)}
+.chip.lic{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
+.chip.lic.ok{background:#e3f3e6;color:#1d5a2a}.chip.lic.no{background:#f6e6e3;color:#7a2a1d}
+@media (prefers-color-scheme:dark){.chip.lic.ok{background:#173a22;color:#9fd8ab}.chip.lic.no{background:#3d1f1a;color:#f0a898}}
 .badge{display:inline-block;background:var(--badge);color:var(--badgefg);padding:1px 8px;border-radius:6px;font-size:12px;margin-bottom:2px;align-self:flex-start}
 .card p.sum{margin:0;font-size:14px;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
 .card p.sum.open{display:block;-webkit-line-clamp:unset}
@@ -111,6 +114,10 @@ def card(p: dict) -> str:
     if p["venue"]:
         meta.append('<span class="chip v">%s</span>' % E(p["venue"]))
     meta.append('<span class="chip">%s</span>' % E(p["kind"]))
+    if p.get("license"):
+        ok = P.embed_allowed(p["license"])
+        meta.append('<span class="chip lic %s" title="%s">%s</span>' % (
+            "ok" if ok else "no", "그림 그대로 실어도 됨(출처 표기)" if ok else "그림 재사용 허락 없음 — 다시 그린다", E(p["license"])))
     for c in p["chips"]:
         if c != p["venue"] and c != p["year"]:
             meta.append('<span class="chip">%s</span>' % E(c))

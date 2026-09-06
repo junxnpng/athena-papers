@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+"""source_url 이 arXiv 인 논문의 라이선스를 abs 페이지에서 읽어 data/papers.json 의 license 필드에 넣는다.
+사람이 대화형에서만 돌린다(네트워크). 값은 arXiv 가 표시한 것만 쓴다 — 추측하지 않는다.
+
+  scripts/fill-licenses [--force] [--pause 3]
+
+코드:  cc-by-4.0 · cc-by-sa-4.0 · cc-by-nc-sa-4.0 · cc-by-nc-nd-4.0 · cc0-1.0 · arxiv-nonexclusive-1.0 · other:<url>
+비-arXiv 원문(학회 페이지·블로그)은 비워 둔다 — 사람이 채운다.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+LICENSE_RE = re.compile(r'https?://(creativecommons\.org/(?:licenses|publicdomain)/[a-z-]+/[0-9.]+|arxiv\.org/licenses/[a-z-]+/[0-9.]+)')
+
+
+def code_for(url: str) -> str:
+    u = url.rstrip("/")
+    m = re.search(r"creativecommons\.org/licenses/([a-z-]+)/([0-9.]+)", u)
+    if m:
+        return "cc-%s-%s" % (m.group(1), m.group(2))
+    if "creativecommons.org/publicdomain/zero" in u:
+        return "cc0-1.0"
+    m = re.search(r"arxiv\.org/licenses/([a-z-]+)/([0-9.]+)", u)
+    if m:
+        name = m.group(1).replace("-distrib", "")  # nonexclusive-distrib → nonexclusive
+        return "arxiv-%s-%s" % (name, m.group(2))
+    return "other:" + u
+
+
+def fetch_license(abs_url: str, timeout: int = 20) -> str:
+    req = urllib.request.Request(abs_url, headers={"User-Agent": "papers-license/1 (personal study)"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        html = r.read().decode("utf-8", "replace")
+    m = LICENSE_RE.search(html)
+    return code_for(m.group(0)) if m else ""
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--force", action="store_true", help="이미 있는 값도 다시 조회")
+    ap.add_argument("--pause", type=float, default=3.0)
+    a = ap.parse_args(argv)
+    data = P.load()
+    done, skipped, failed = 0, 0, []
+    for p in data["papers"]:
+        if not P.is_arxiv(p.get("source_url", "")):
+            continue
+        if p.get("license") and not a.force:
+            skipped += 1
+            continue
+        try:
+            lic = fetch_license(p["source_url"])
+        except Exception as e:  # noqa: BLE001
+            failed.append((p["id"], str(e)[:60]))
+            time.sleep(a.pause)
+            continue
+        if lic:
+            p["license"] = lic
+            done += 1
+            print("  %-28s %s" % (p["id"], lic))
+        else:
+            failed.append((p["id"], "라이선스 표시를 못 찾음"))
+        time.sleep(a.pause)
+    P.dump(data)
+    from collections import Counter
+    dist = Counter(p.get("license") or "(없음)" for p in data["papers"])
+    print("license: 새로 %d · 이미 있음 %d · 실패 %d" % (done, skipped, len(failed)))
+    for k, v in sorted(dist.items(), key=lambda kv: -kv[1]):
+        print("  %3d  %s" % (v, k))
+    for pid, err in failed:
+        print("  실패:", pid, "|", err)
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
