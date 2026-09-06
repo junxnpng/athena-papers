@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""원본 스터디 사이트의 /papers/ 하위(논문 페이지 전부)와 거기서 참조하는 자원(그림·CSS·JS·PDF)을 로컬에 통째로 보관한다.
+저장 위치는 data/raw/site/ (git 제외). 사람이 대화형에서만 돌린다.
+
+  scripts/mirror [--base URL] [--out data/raw/site] [--workers 8]
+
+--base 를 생략하면 환경변수 PAPERS_BASE, 그다음 data/raw/base.txt 를 읽는다. 어디에도 없으면 실패한다 — 코드에 주소를 적지 않는다.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+import threading
+import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+_ATTR = re.compile(r'(?:src|href)=["\']([^"\'#]+)', re.I)
+_ASSET_EXT = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".pdf", ".css", ".js", ".woff", ".woff2", ".ttf", ".mp4", ".json")
+
+
+def local_path(out: Path, url: str) -> Path:
+    p = urllib.parse.urlparse(url).path
+    if p.endswith("/"):
+        p += "index.html"
+    return out / p.lstrip("/")
+
+
+def fetch(url: str):
+    req = urllib.request.Request(url, headers={"User-Agent": "papers-mirror/1"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.headers.get("Content-Type", ""), r.read()
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--base", default="")
+    ap.add_argument("--out", default=str(P.RAW_DIR / "site"))
+    ap.add_argument("--workers", type=int, default=8)
+    a = ap.parse_args(argv)
+    base = P.resolve_base(a.base)
+    host = urllib.parse.urlparse(base).netloc
+    out = Path(a.out)
+    seen, lock = set(), threading.Lock()
+    stats = {"pages": 0, "assets": 0, "bytes": 0, "errors": []}
+
+    def want(url: str, from_page: bool):
+        u = urllib.parse.urlparse(url)
+        if u.netloc != host or u.scheme not in ("http", "https"):
+            return False
+        path = u.path
+        if path.lower().endswith(_ASSET_EXT):
+            return True  # 자원은 호스트 어디에 있든 받는다
+        return from_page and path.startswith("/papers/")  # 페이지는 /papers/ 아래만
+
+    def grab(url: str):
+        try:
+            ctype, body = fetch(url)
+        except Exception as e:  # noqa: BLE001
+            with lock:
+                stats["errors"].append("%s: %s" % (url, e))
+            return []
+        dst = local_path(out, url)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes(body)
+        found = []
+        is_html = "text/html" in ctype
+        with lock:
+            stats["pages" if is_html else "assets"] += 1
+            stats["bytes"] += len(body)
+        if is_html or url.endswith(".css"):
+            text = body.decode("utf-8", "replace")
+            refs = _ATTR.findall(text) if is_html else re.findall(r"url\(['\"]?([^'\")]+)", text)
+            for ref in refs:
+                nu = urllib.parse.urljoin(url, ref.split("?")[0])
+                if want(nu, is_html):
+                    found.append(nu)
+        return found
+
+    frontier = [urllib.parse.urljoin(base, "papers/")]
+    with ThreadPoolExecutor(max_workers=a.workers) as ex:
+        while frontier:
+            batch = []
+            with lock:
+                for u in frontier:
+                    if u not in seen:
+                        seen.add(u)
+                        batch.append(u)
+            frontier = []
+            for links in ex.map(grab, batch):
+                frontier.extend(links)
+    print("mirror: pages=%d assets=%d bytes=%d → %s" % (stats["pages"], stats["assets"], stats["bytes"], out))
+    for e in stats["errors"][:20]:
+        print("  error:", e)
+    return 1 if stats["errors"] else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

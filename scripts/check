@@ -1,0 +1,7 @@
+#!/bin/sh
+# 자가 검증 — 정본 스키마·내부 맥락 검사 + 사이트 최신 여부 + unittest. exit 0 = pass. stdlib 만.
+cd "$(dirname "$0")/.." || exit 1
+python3 scripts/papers.py --validate || exit 1
+python3 scripts/build --check || exit 1
+if ls tests/test_*.py >/dev/null 2>&1; then python3 -m unittest discover -s tests -q || exit 1; fi
+echo "check: ok"

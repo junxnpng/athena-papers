@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""원본 스터디 사이트의 Paper Hub 에서 논문 메타데이터를 긁어 정본을 갱신한다. 사람이 대화형에서만 돌린다 (밤은 네트워크 금지).
+
+  scripts/pull [--base URL]   사이트 → data/raw/papers.raw.json → data/papers.json
+  scripts/pull --from-raw     네트워크 없이 raw 에서 data/papers.json 만 재생성
+
+--base 를 생략하면 PAPERS_BASE, 그다음 data/raw/base.txt 를 읽는다. 코드에 주소를 적지 않는다.
+
+허브 10개의 카드(hcard)와 논문 본문의 머리(eyebrow·authors·affil·abstract)만 읽는다. 번역 본문은 가져오지 않는다.
+"""
+from __future__ import annotations
+
+import argparse
+import html
+import re
+import sys
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+_ANY_LINK = re.compile(r'https?://[^"\'\s<>]+')
+
+
+def get(url: str) -> str:
+    with urllib.request.urlopen(url, timeout=15) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def strip(s: str) -> str:
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+
+
+def translation_kind(page_title: str) -> str:
+    t = page_title or ""
+    if "핵심 발췌 번역" in t:
+        return "핵심 발췌 번역"
+    if "정독·분석" in t:
+        return "정독·분석"
+    if "한글 번역" in t:
+        return "전문 번역"
+    if "해설" in t or "정리" in t:
+        return "해설"
+    return "기타"
+
+
+def _first(rx: str, text: str, flags=re.S) -> str:
+    m = re.search(rx, text, flags)
+    return m.group(1) if m else ""
+
+
+def parse_cards(page: str):
+    """허브 페이지 → (소분류, 카드 HTML) 를 문서 순서대로."""
+    sub = ""
+    for tok in re.split(r'(<h3 class="sub">.*?</h3>|<a class="hcard".*?</a>)', page, flags=re.S):
+        if tok.startswith('<h3 class="sub">'):
+            sub = strip(re.sub(r'<span class="n">.*?</span>', "", tok))
+        elif tok.startswith('<a class="hcard"'):
+            yield sub, tok
+
+
+def card_fields(card: str) -> dict:
+    h3 = _first(r"<h3>(.*?)</h3>", card)
+    return {
+        "href": _first(r'href="([^"]+)"', card),
+        "badge": strip(_first(r'<span class="hc-badge">(.*?)</span>', h3)),
+        "title_ko": strip(re.sub(r'<span class="hc-badge">.*?</span>', "", h3, flags=re.S)),
+        "title_en": strip(_first(r'<div class="hc-sub">(.*?)</div>', card)),
+        "summary": strip(_first(r'<p class="hc-sum">(.*?)</p>', card)),
+        "chips": [strip(c) for c in re.findall(r'<span class="chip[^"]*">(.*?)</span>', card, re.S)],
+        "venue": strip(_first(r'<span class="chip venue">(.*?)</span>', card)),
+        "year": strip(_first(r'<span class="chip year">(.*?)</span>', card)),
+    }
+
+
+def page_fields(pg: str, host: str = "") -> dict:
+    abstract = _first(r'<section class="abstract"[^>]*>.*?<h2>.*?</h2>(.*?)</section>', pg)
+    links = [u for u in _ANY_LINK.findall(pg) if urllib.parse.urlparse(u).netloc != host]
+    return {
+        "page_title": strip(_first(r"<title>(.*?)</title>", pg)),
+        "eyebrow": strip(_first(r'<div class="eyebrow">(.*?)</div>', pg)),
+        "authors": strip(_first(r'<div class="authors">(.*?)</div>', pg)),
+        "affil": strip(_first(r'<div class="affil">(.*?)</div>', pg)),
+        "abstract": strip(abstract)[:1500],
+        "figures": len(re.findall(r"<figure", pg)),
+        "links": sorted(set(links))[:40],
+        "bytes": len(pg.encode("utf-8")),
+    }
+
+
+def crawl(base: str) -> dict:
+    host = urllib.parse.urlparse(base).netloc
+    hub_page = get(urllib.parse.urljoin(base, "papers/"))
+    hubs, papers = [], []
+    for _, card in parse_cards(hub_page):
+        c = card_fields(card)
+        hid = urllib.parse.urljoin(base + "papers/", c["href"]).rstrip("/").split("/")[-1]
+        hubs.append({"id": hid, "name": c["title_ko"], "blurb": c["summary"], "count": c["badge"]})
+    for h in hubs:
+        hub_url = urllib.parse.urljoin(base, "papers/%s/" % h["id"])
+        for sub, card in parse_cards(get(hub_url)):
+            c = card_fields(card)
+            url = urllib.parse.urljoin(hub_url, c["href"])
+            path = urllib.parse.urlparse(url).path
+            if not path.startswith("/papers/%s/" % h["id"]):
+                continue  # 다른 허브로 가는 안내 카드
+            pg = page_fields(get(url), host)
+            c.update(pg)
+            c.update({"hub": h["id"], "subcategory": sub, "path": path,
+                      "kind": translation_kind(pg["page_title"]),
+                      "venue": c["venue"] or pg["eyebrow"]})
+            c.pop("href", None)
+            papers.append(c)
+            print("  ", path, file=sys.stderr)
+    return {"version": 1, "hubs": hubs, "papers": papers}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--base", default="")
+    ap.add_argument("--from-raw", action="store_true")
+    a = ap.parse_args(argv)
+    if a.from_raw:
+        raw = P.load(P.RAW)
+    else:
+        raw = crawl(P.resolve_base(a.base))
+        P.dump(raw, P.RAW)
+        print("raw: %d papers → %s" % (len(raw["papers"]), P.RAW.relative_to(P.ROOT)))
+    public = P.build_public(raw)
+    if P.DATA.exists():
+        public = P.merge_public(P.load(P.DATA), public)
+    P.dump(public, P.DATA)
+    todo = sum(1 for p in public["papers"] if p["needs_rewrite"])
+    print("public: %d papers, needs_rewrite=%d → %s" % (len(public["papers"]), todo, P.DATA.relative_to(P.ROOT)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,20 @@
+{
+  "_doc": "도메인 계약 ④⑤ + 예산. papers: 공개 사이트 — 데이터·스크립트·사이트만 쓴다. raw 는 사람 몫.",
+  "write_scope": ["data/papers.json", "scripts", "site", "tests", "docs", "README.md"],
+  "human_scope": ["data/raw"],
+  "tools": [
+    {"name": "build", "cmd": "python3 scripts/build", "note": "정본 → site/index.html. 데이터를 고친 뒤 반드시 돌린다"},
+    {"name": "validate", "cmd": "python3 scripts/papers.py --validate", "note": "--strict-rewrite / --strict-venue 로 리프별 게이트"}
+  ],
+  "verify": {"cmd": ".harness/verify", "timeout_sec": 300, "smoke_timeout_sec": 120},
+  "bootstrap": {"cmd": ".harness/init.sh", "timeout_sec": 120},
+  "budget": {
+    "hours": 2, "leaf_min_minutes": 5, "leaf_max_minutes": 25, "max_attempts": 2,
+    "starvation_minutes": 1440, "max_night_usd": null, "max_day_usd": null, "rate_limit_stop": 0.85
+  },
+  "driver": {"name": "claude", "model": "opus", "effort": null, "max_turns": 60, "max_budget_usd": 2.5},
+  "plan": {"auto_propose": true, "auto_accept": false, "propose_count": 4, "max_rounds": 3},
+  "data_class": "public",
+  "_data_class": "public: 사이트 자체가 공개 대상. 단 러너 모드는 어차피 네트워크 금지(I7) — 원본 재추출은 사람이.",
+  "_plan": "auto_accept 끔 — 공개 문장은 아침에 사람이 제안을 읽고 accept 한다."
+}

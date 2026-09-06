@@ -1,0 +1,4 @@
+#!/bin/sh
+# 도메인 계약 ② — 전체 검증기. exit 0 = pass. 내용은 scripts/check 하나로 모은다.
+cd "$(dirname "$0")/.." || exit 1
+exec sh scripts/check
