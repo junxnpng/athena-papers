@@ -16,7 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import papers as P  # noqa: E402
 
 SITE = P.ROOT / "site" / "index.html"
-TITLE = "LLM 추론·서빙 논문 요약"
+TITLE = "Papers"
+HUB_EN = {"concept": "Concepts & Surveys", "model": "Models", "runtime": "Serving Runtime", "kv-cache": "KV Cache",
+          "distributed": "Distributed Serving", "storage": "Storage", "hardware-path": "Hardware Path",
+          "session-reuse": "Session KV Reuse", "workload": "Workloads", "sim-method": "Simulation & Traces"}
+KIND_EN = {"전문 번역": "full translation", "핵심 발췌 번역": "key excerpts", "정독·분석": "close reading", "해설": "explainer", "기타": "note"}
 
 CSS = """
 :root{--bg:#f7f7f5;--fg:#1b1b1b;--mut:#6b6b66;--card:#fff;--line:#e3e2dd;--acc:#1f5fbf;--chip:#eef0f4;--chipfg:#333;--badge:#ffe9b3;--badgefg:#6b4b00;--hl:#fff7cf}
@@ -82,7 +86,7 @@ JS = """
     });
     document.querySelectorAll('.sec').forEach(function(sec){
       var n=0; sec.querySelectorAll('.card').forEach(function(c){ if(!c.hidden) n++; });
-      sec.hidden=n===0; var lbl=sec.querySelector('h2 .n'); if(lbl) lbl.textContent=n+'편';
+      sec.hidden=n===0; var lbl=sec.querySelector('h2 .n'); if(lbl) lbl.textContent=n;
       sec.querySelectorAll('.subblock').forEach(function(b){
         var m=0; b.querySelectorAll('.card').forEach(function(c){ if(!c.hidden) m++; });
         b.hidden=m===0; var l=b.querySelector('h3 .n'); if(l) l.textContent=m;
@@ -113,25 +117,25 @@ def card(p: dict) -> str:
     meta = []
     if p["venue"]:
         meta.append('<span class="chip v">%s</span>' % E(p["venue"]))
-    meta.append('<span class="chip">%s</span>' % E(p["kind"]))
+    meta.append('<span class="chip">%s</span>' % E(KIND_EN.get(p["kind"], p["kind"])))
     if p.get("license"):
         ok = P.embed_allowed(p["license"])
         meta.append('<span class="chip lic %s" title="%s">%s</span>' % (
-            "ok" if ok else "no", "그림 그대로 실어도 됨(출처 표기)" if ok else "그림 재사용 허락 없음 — 다시 그린다", E(p["license"])))
+            "ok" if ok else "no", "Figures may be reproduced with credit" if ok else "No reuse permission — redraw figures", E(p["license"])))
     for c in p["chips"]:
         if c != p["venue"] and c != p["year"]:
             meta.append('<span class="chip">%s</span>' % E(c))
     out.append('<div class="meta">%s</div>' % "".join(meta))
     if p["summary"]:
-        out.append('<p class="sum" title="클릭하면 전체가 펼쳐집니다">%s</p>' % E(p["summary"]))
+        out.append('<p class="sum" title="Click to expand">%s</p>' % E(p["summary"]))
     if p["needs_rewrite"]:
-        out.append('<div class="todo">요약 정리 중</div>')
+        out.append('<div class="todo">summary pending</div>')
     if p["abstract"]:
-        out.append("<details><summary>초록</summary><p>%s</p></details>" % E(p["abstract"]))
+        out.append("<details><summary>Abstract</summary><p>%s</p></details>" % E(p["abstract"]))
     if p["authors"]:
         who = E(p["authors"]) + (" · " + E(p["affil"]) if p["affil"] else "")
         out.append('<div class="who">%s</div>' % who)
-    link = ('<a href="%s" target="_blank" rel="noopener">원문 ↗</a>' % E(p["source_url"], quote=True)) if p["source_url"] else '<span class="todo">원문 링크 미확인</span>'
+    link = ('<a href="%s" target="_blank" rel="noopener">Source ↗</a>' % E(p["source_url"], quote=True)) if p["source_url"] else '<span class="todo">source link pending</span>'
     out.append('<div class="foot"><span class="who">%s</span>%s</div>' % (E(p["subcategory"]), link))
     out.append("</article>")
     return "\n".join(out)
@@ -140,7 +144,7 @@ def card(p: dict) -> str:
 def render(data: dict) -> str:
     papers = data["papers"]
     hubs = data.get("hubs", [])
-    hub_name = {h["id"]: h["name"] for h in hubs}
+    hub_name = {h["id"]: HUB_EN.get(h["id"], h["name"]) for h in hubs}
     hub_blurb = {h["id"]: h["blurb"] for h in hubs}
     groups = OrderedDict()
     for p in papers:
@@ -148,24 +152,26 @@ def render(data: dict) -> str:
     years = sorted({p["year"] for p in papers if p["year"]}, reverse=True)
     kinds = [k for k in P.KINDS if any(p["kind"] == k for p in papers)]
 
-    h = ["<title>%s</title>" % E(TITLE), "<style>%s</style>" % CSS, '<div class="wrap">',
+    h = ['<!doctype html>', '<html lang="ko">', '<head>', '<meta charset="utf-8">',
+         '<meta name="viewport" content="width=device-width, initial-scale=1">',
+         "<title>%s</title>" % E(TITLE), "<style>%s</style>" % CSS, "</head><body>", '<div class="wrap">',
          '<header class="top"><h1>%s</h1>' % E(TITLE),
-         "<p>추론·서빙 인프라 논문과 기술 문서를 읽고 정리한 요약. 요약과 원문 링크만 싣는다.</p>",
-         '<div class="tally"><b>%d</b> 편 · 분야 <b>%d</b> · 표시 <b id="shown">%d</b> 편</div></header>' % (
+         "<p>Reading notes on LLM inference and serving. Summaries in Korean, links to the originals.</p>",
+         '<div class="tally"><b>%d</b> papers · <b>%d</b> areas · showing <b id="shown">%d</b></div></header>' % (
              len(papers), len(groups), len(papers)),
          '<div class="bar"><div class="row">',
-         '<input id="q" type="search" placeholder="제목·요약·저자·키워드 검색" aria-label="검색">',
-         '<select id="kind" aria-label="번역 깊이"><option value="">깊이 전체</option>%s</select>' % "".join(
-             '<option value="%s">%s</option>' % (E(k), E(k)) for k in kinds),
-         '<select id="year" aria-label="연도"><option value="">연도 전체</option>%s</select>' % "".join(
+         '<input id="q" type="search" placeholder="Search title, summary, authors, keywords" aria-label="Search">',
+         '<select id="kind" aria-label="Depth"><option value="">All depths</option>%s</select>' % "".join(
+             '<option value="%s">%s</option>' % (E(k), E(KIND_EN.get(k, k))) for k in kinds),
+         '<select id="year" aria-label="Year"><option value="">All years</option>%s</select>' % "".join(
              '<option value="%s">%s</option>' % (E(y), E(y)) for y in years),
-         '<button id="reset" type="button">초기화</button></div>',
-         '<div class="hubs"><button type="button" data-hub="">전체</button>%s</div></div>' % "".join(
+         '<button id="reset" type="button">Reset</button></div>',
+         '<div class="hubs"><button type="button" data-hub="">All</button>%s</div></div>' % "".join(
              '<button type="button" data-hub="%s">%s<small>%d</small></button>' % (E(hid), E(hub_name.get(hid, hid)), sum(len(v) for v in subs.values()))
              for hid, subs in groups.items())]
     for hid, subs in groups.items():
         n = sum(len(v) for v in subs.values())
-        h.append('<section class="sec" id="%s"><h2>%s <span class="n">%d편</span></h2>' % (E(hid), E(hub_name.get(hid, hid)), n))
+        h.append('<section class="sec" id="%s"><h2>%s <span class="n">%d</span></h2>' % (E(hid), E(hub_name.get(hid, hid)), n))
         if hub_blurb.get(hid):
             h.append('<p class="blurb">%s</p>' % E(hub_blurb[hid]))
         for sub, ps in subs.items():
@@ -174,10 +180,10 @@ def render(data: dict) -> str:
                 h.append('<h3 class="sub">%s<span class="n">%d</span></h3>' % (E(sub), len(ps)))
             h.append('<div class="grid">%s</div></div>' % "\n".join(card(p) for p in ps))
         h.append("</section>")
-    h.append('<div id="empty" class="empty" hidden>조건에 맞는 논문이 없습니다.</div>')
-    h.append("<footer><p>각 카드는 논문의 기여를 한국어로 간추린 요약이며, 저작권이 있는 본문·그림은 싣지 않는다. 원문은 링크로 간다.</p>"
-             "<p>요약은 개인 학습 기록이라 오류가 있을 수 있다. 정확한 내용은 원문을 본다.</p></footer>")
-    h.append("</div><script>%s</script>" % JS)
+    h.append('<div id="empty" class="empty" hidden>No papers match.</div>')
+    h.append("<footer><p>Each card is a Korean summary of a paper's contribution. Copyrighted text and figures are not reproduced; follow the link to the original.</p>"
+             "<p>These are personal reading notes and may contain errors. Refer to the original for the facts.</p></footer>")
+    h.append("</div><script>%s</script></body></html>" % JS)
     return "\n".join(h) + "\n"
 
 

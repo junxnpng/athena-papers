@@ -130,7 +130,8 @@ class BuildTest(unittest.TestCase):
         self.assertIn("X: 제목", h1)
         self.assertIn("Y &lt;b&gt;제목&lt;/b&gt;", h1)
         self.assertIn('data-year="2024"', h1)
-        self.assertIn("원문 링크 미확인", h1)
+        self.assertIn("source link pending", h1)
+        self.assertIn('<meta charset="utf-8">', h1)  # 독립 파일로 서빙 — 없으면 한글이 깨진다 (실측)
         self.assertNotIn("<script src", h1)  # 외부 자원 없음
 
     def test_check_detects_stale_site(self):
