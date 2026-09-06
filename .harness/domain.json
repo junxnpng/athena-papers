@@ -1,5 +1,5 @@
 {
-  "_doc": "도메인 계약 ④⑤ + 예산. papers: 공개 사이트 — 데이터·스크립트·사이트만 쓴다. raw 는 사람 몫.",
+  "_doc": "도메인 계약 ④⑤ + 예산. papers: 데이터·검증·노트만. 사이트는 athena-web 이고 scripts/export 가 한 방향으로 내보낸다. raw 는 사람 몫.",
   "write_scope": [
     "data/papers.json",
     "scripts",
@@ -7,11 +7,7 @@
     "tests",
     "docs",
     "README.md",
-    "content",
-    "layouts",
-    "assets",
-    "static",
-    "hugo.yaml"
+    "notes"
   ],
   "human_scope": [
     "data/raw"

@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""검증을 통과한 산출물을 athena-web 에 한 방향으로 내보낸다. 사람이 돌린다.
+
+  scripts/export [--to ../athena-web] [--dry-run]
+
+보내는 것
+  site/index.html   → <web>/static/papers/index.html   (카탈로그)
+  notes/*.md        → <web>/content/notes/<slug>.md     (논문 노트. 대상 폴더를 원고와 같게 맞춘다 — 원고에 없는 노트는 지운다)
+내보내기 전에 scripts/check 를 돌리고, 실패하면 아무것도 쓰지 않는다. 커밋은 하지 않는다 — 웹 레포에서 사람이 한다.
+"""
+from __future__ import annotations
+
+import argparse
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+NOTES = P.ROOT / "notes"
+CATALOG = P.ROOT / "site" / "index.html"
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--to", default=str(P.ROOT.parent / "athena-web"))
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args(argv)
+    web = Path(a.to).resolve()
+    if not (web / "hugo.yaml").exists():
+        sys.exit("athena-web 이 아니다: %s (hugo.yaml 없음)" % web)
+    r = subprocess.run(["sh", str(P.ROOT / "scripts" / "check")], cwd=str(P.ROOT), encoding="utf-8",
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if r.returncode != 0:
+        print(r.stdout)
+        sys.exit("scripts/check 실패 — 내보내지 않는다")
+    plan = [(CATALOG, web / "static" / "papers" / "index.html")]
+    src_notes = sorted(p for p in NOTES.glob("*.md") if p.name.lower() != "readme.md" and not p.name.startswith("_")) if NOTES.exists() else []
+    dst_dir = web / "content" / "notes"
+    for n in src_notes:
+        plan.append((n, dst_dir / n.name))
+    keep = {d.name for _, d in plan if d.parent == dst_dir} | {"_index.md"}
+    stale = [p for p in dst_dir.glob("*.md") if p.name not in keep] if dst_dir.exists() else []
+    for s, d in plan:
+        print("  %s → %s" % (s.relative_to(P.ROOT), d.relative_to(web)))
+    for p in stale:
+        print("  삭제 %s (원고에 없음)" % p.relative_to(web))
+    if a.dry_run:
+        print("dry-run: 카탈로그 1 · 노트 %d · 삭제 %d" % (len(src_notes), len(stale)))
+        return 0
+    for s, d in plan:
+        d.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(s, d)
+    for p in stale:
+        p.unlink()
+    print("export: 카탈로그 1 · 노트 %d · 삭제 %d → %s" % (len(src_notes), len(stale), web))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

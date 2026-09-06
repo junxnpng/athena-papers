@@ -74,7 +74,7 @@ class FigureRulesTest(unittest.TestCase):
 
 class PostRulesTest(unittest.TestCase):
     def check(self, text, figs=None):
-        return R.check_post(Path("content/posts/x.md"), text, figs or {"figures": []}, PAPERS)
+        return R.check_post(Path("notes/x.md"), text, figs or {"figures": []}, PAPERS)
 
     def test_good_post_passes(self):
         self.assertEqual(self.check(post()), [])

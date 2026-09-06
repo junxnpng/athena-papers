@@ -3,7 +3,7 @@
 
 검사 대상
   data/figures.json     글에 실을 그림의 허용 목록. 여기 없는 그림은 글에 못 넣는다.
-  content/posts/**/*.md Hugo 논문 글(아직 없어도 된다). 뼈대 페이지(search·archives·about)는 대상이 아니다. 제목 영어 · 본문 한국어 · 분량 상한 · 그림은 허용 목록에서만 · 금지 문구 없음.
+  notes/**/*.md         논문 노트 원고(Hugo front matter). 아직 없어도 된다. 제목 영어 · 본문 한국어 · 분량 상한 · 그림은 허용 목록에서만 · 금지 문구 없음.
 
   scripts/rules.py [--root DIR]
 """
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import papers as P  # noqa: E402
 
 FIGURES = P.ROOT / "data" / "figures.json"
-CONTENT = P.ROOT / "content" / "posts"  # 논문 글만. search/archives/about 은 영어 뼈대 페이지
+NOTES = P.ROOT / "notes"  # 논문 노트 원고. scripts/export 가 검증 통과분만 athena-web/content/notes/ 로 보낸다
 _IMG_MD = re.compile(r"!\[[^\]]*\]\(([^)\s]+)")
 _IMG_HTML = re.compile(r'<img[^>]+src="([^"]+)"', re.I)
 _FRONT = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.S)
@@ -105,7 +105,7 @@ def check_posts(content: Path, figs: dict, papers_by_id: dict):
     if not content.exists():
         return problems
     for md in sorted(content.rglob("*.md")):
-        if md.name.startswith("_"):
+        if md.name.startswith("_") or md.name.lower() == "readme.md":  # 안내 파일은 노트가 아니다
             continue
         problems += check_post(md.relative_to(P.ROOT), md.read_text(encoding="utf-8"), figs, papers_by_id)
     return problems
@@ -119,12 +119,12 @@ def main(argv=None) -> int:
     data = P.load(root / "data" / "papers.json")
     by_id = {p["id"]: p for p in data["papers"]}
     figs = load_figures(root / "data" / "figures.json")
-    problems = check_figures(figs, by_id) + check_posts(root / "content" / "posts", figs, by_id)
+    problems = check_figures(figs, by_id) + check_posts(root / "notes", figs, by_id)
     for pr in problems:
         print("FAIL", pr)
-    pdir = root / "content" / "posts"
+    pdir = root / "notes"
     nposts = len([m for m in pdir.rglob("*.md") if not m.name.startswith("_")]) if pdir.exists() else 0
-    print("rules: figures=%d posts=%d problems=%d" % (len(figs.get("figures", [])), nposts, len(problems)))
+    print("rules: figures=%d notes=%d problems=%d" % (len(figs.get("figures", [])), nposts, len(problems)))
     return 1 if problems else 0
 
 
