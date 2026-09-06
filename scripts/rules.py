@@ -123,7 +123,7 @@ def main(argv=None) -> int:
     for pr in problems:
         print("FAIL", pr)
     pdir = root / "notes"
-    nposts = len([m for m in pdir.rglob("*.md") if not m.name.startswith("_")]) if pdir.exists() else 0
+    nposts = len([m for m in pdir.rglob("*.md") if not m.name.startswith("_") and m.name.lower() != "readme.md"]) if pdir.exists() else 0
     print("rules: figures=%d notes=%d problems=%d" % (len(figs.get("figures", [])), nposts, len(problems)))
     return 1 if problems else 0
 
