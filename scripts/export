@@ -5,12 +5,14 @@
 
 보내는 것
   site/catalog.fragment.html → <web>/assets/catalog/catalog.fragment.html   (카탈로그 조각 — Hugo 의 layouts/papers/list.html 이 감싼다)
-  notes/*.md        → <web>/content/notes/<slug>.md     (논문 노트. 대상 폴더를 원고와 같게 맞춘다 — 원고에 없는 노트는 지운다)
+  notes/*.md        → <web>/content/notes/<slug>.md     (status: reviewed 만. 자동 필드는 정본으로 다시 맞춘다. 웹에만 있는 노트는 지운다)
 내보내기 전에 scripts/check 를 돌리고, 실패하면 아무것도 쓰지 않는다. 커밋은 하지 않는다 — 웹 레포에서 사람이 한다.
 """
 from __future__ import annotations
 
 import argparse
+import importlib.machinery
+import importlib.util
 import shutil
 import subprocess
 import sys
@@ -18,6 +20,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import papers as P  # noqa: E402
+import rules as R  # noqa: E402
+
+_ld = importlib.machinery.SourceFileLoader("note_new", str(Path(__file__).resolve().parent / "note-new"))
+_sp = importlib.util.spec_from_loader("note_new", _ld)
+NN = importlib.util.module_from_spec(_sp)
+_ld.exec_module(NN)
+
+
+def synced_note(text: str, by_id: dict) -> str:
+    """front matter 의 자동 필드를 정본으로 다시 쓴다. 사람 필드와 본문은 그대로."""
+    fm, body = R.parse_post(text)
+    p = by_id.get(fm.get("paper", ""))
+    if not p:
+        return text
+    return NN.front_matter(p, fm.get("depth", "brief"), fm.get("date", ""), existing=fm) + body
 
 NOTES = P.ROOT / "notes"
 CATALOG = P.ROOT / "site" / "catalog.fragment.html"
@@ -39,7 +56,12 @@ def main(argv=None) -> int:
         sys.exit("scripts/check 실패 — 내보내지 않는다")
     plan = [(CATALOG, web / "assets" / "catalog" / "catalog.fragment.html")]
     legacy = web / LEGACY
-    src_notes = sorted(p for p in NOTES.glob("*.md") if p.name.lower() != "readme.md" and not p.name.startswith("_")) if NOTES.exists() else []
+    by_id = {p["id"]: p for p in P.load()["papers"]}
+    all_notes = sorted(p for p in NOTES.glob("*.md") if p.name.lower() != "readme.md" and not p.name.startswith("_")) if NOTES.exists() else []
+    src_notes, held = [], []
+    for n in all_notes:
+        fm, _ = R.parse_post(n.read_text(encoding="utf-8"))
+        (src_notes if fm.get("status") == "reviewed" else held).append(n)
     dst_dir = web / "content" / "notes"
     for n in src_notes:
         plan.append((n, dst_dir / n.name))
@@ -47,6 +69,8 @@ def main(argv=None) -> int:
     stale = [p for p in dst_dir.glob("*.md") if p.name not in keep] if dst_dir.exists() else []
     for s, d in plan:
         print("  %s → %s" % (s.relative_to(P.ROOT), d.relative_to(web)))
+    for h in held:
+        print("  보류 %s (status 가 reviewed 가 아니다)" % h.relative_to(P.ROOT))
     for p in stale:
         print("  삭제 %s (원고에 없음)" % p.relative_to(web))
     if legacy.exists():
@@ -56,7 +80,10 @@ def main(argv=None) -> int:
         return 0
     for s, d in plan:
         d.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(s, d)
+        if s.parent == NOTES:
+            d.write_text(synced_note(s.read_text(encoding="utf-8"), by_id), encoding="utf-8")
+        else:
+            shutil.copyfile(s, d)
     for p in stale:
         p.unlink()
     if legacy.exists():

@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""정본에서 front matter 를 채운 노트 뼈대를 만든다.  scripts/note-new <paper-id> [--depth core|brief] [--force]
+
+slug = id 의 마지막 조각. 다른 hub 에 같은 slug 가 있으면 <hub>--<slug>. 배지 ★ 면 depth 기본 core.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import papers as P  # noqa: E402
+
+HUB_EN = {"concept": "Concepts & Surveys", "model": "Models", "runtime": "Serving Runtime", "kv-cache": "KV Cache",
+          "distributed": "Distributed Serving", "storage": "Storage", "hardware-path": "Hardware Path",
+          "session-reuse": "Session KV Reuse", "workload": "Workloads", "sim-method": "Simulation & Traces"}
+KIND_TAG = {"전문 번역": "full-translation", "핵심 발췌 번역": "key-excerpts", "정독·분석": "close-reading", "해설": "explainer", "기타": "note"}
+
+
+def slug_for(pid: str, papers) -> str:
+    slug = pid.split("/")[-1]
+    if sum(1 for p in papers if p["id"].split("/")[-1] == slug) > 1:
+        return "%s--%s" % (pid.split("/")[0], slug)
+    return slug
+
+
+def yaml_str(v: str) -> str:
+    return '"%s"' % str(v).replace('"', '\\"')
+
+
+def front_matter(p: dict, depth: str, today: str, existing: dict = None) -> str:
+    """자동 필드는 정본에서, 사람 필드(depth·status·related·summary)는 기존 값을 지킨다."""
+    ex = existing or {}
+    related = ex.get("related", [])
+    if isinstance(related, str):
+        related = [related] if related else []
+    tags = [KIND_TAG.get(p["kind"], "note")]
+    lines = [
+        "---",
+        "title: %s" % yaml_str(p["title_en"] or p["title_ko"]),
+        "paper: %s" % p["id"],
+        "depth: %s" % ex.get("depth", depth),
+        "status: %s" % ex.get("status", "draft"),
+        "related: [%s]" % ", ".join(related),
+        "summary: %s" % yaml_str(ex.get("summary", p["summary"] or "(한 줄 결론을 쓴다)")),
+        "# 아래는 정본에서 자동 — 손으로 고치지 않는다 (scripts/export 가 다시 맞춘다)",
+        "venue: %s" % yaml_str(p["venue"]),
+        "year: %s" % (p["year"] or '""'),
+        "source_url: %s" % (p["source_url"] or '""'),
+        "license: %s" % (p["license"] or '""'),
+        "categories: [%s]" % yaml_str(HUB_EN.get(p["hub"], p["hub"])),
+        "tags: [%s]" % ", ".join(yaml_str(t) for t in tags),
+        "date: %s" % ex.get("date", today),
+        "math: %s" % ex.get("math", "false"),
+        "---",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def skeleton(p: dict, depth: str) -> str:
+    result_head = "핵심 사실" if p["kind"] == "해설" else "결과 수치"
+    summ = p["summary"] or "(한 줄 결론을 쓴다)"
+    diagram = "\n```mermaid\nflowchart LR\n  A[(쓰기) 입력] --> B[(쓰기) 핵심 부품]\n```\n" if depth == "core" else ""
+    return (
+        "\n%s\n\n"
+        "## 문제와 핵심 아이디어\n\n(쓰기) 무엇이 병목이었고, 어떤 한 가지 발상으로 풀었나.\n\n"
+        "## 동작 방식\n\n(쓰기) 그 발상이 실제로 어떻게 도나.\n%s\n"
+        "## %s\n\n(쓰기) 가장 중요한 숫자 두세 개를 비교 대상·조건과 함께. 그래프 대신 문장.\n\n"
+        "## 관련\n\n(쓰기) related 의 각 논문을 한 줄씩 — [이름](../slug/) 또는 [이름](/papers/#hub).\n"
+    ) % (summ, diagram, result_head)
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("paper_id")
+    ap.add_argument("--depth", choices=["core", "brief"], default="")
+    ap.add_argument("--force", action="store_true", help="이미 있어도 뼈대로 덮어쓴다")
+    a = ap.parse_args(argv)
+    papers = P.load()["papers"]
+    by_id = {p["id"]: p for p in papers}
+    p = by_id.get(a.paper_id)
+    if not p:
+        sys.exit("정본에 없는 id: %s" % a.paper_id)
+    depth = a.depth or ("core" if p.get("badge", "").startswith("★") else "brief")
+    dst = P.ROOT / "notes" / (slug_for(p["id"], papers) + ".md")
+    if dst.exists() and not a.force:
+        sys.exit("이미 있다: %s (--force 로 덮어쓰기)" % dst.relative_to(P.ROOT))
+    today = dt.date.today().isoformat()
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(front_matter(p, depth, today) + skeleton(p, depth), encoding="utf-8")
+    print("note-new: %s (depth=%s, status=draft)" % (dst.relative_to(P.ROOT), depth))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

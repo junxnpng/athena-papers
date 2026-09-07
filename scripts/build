@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from collections import OrderedDict
 from html import escape as E
@@ -117,7 +118,8 @@ def note_links(root: Path = None):
             continue
         head = md.read_text(encoding="utf-8")[:2000]
         m = re.search(r"^paper:\s*[\"']?([^\"'\n]+)", head, re.M)
-        if m:
+        st = re.search(r"^status:\s*(\w+)", head, re.M)
+        if m and st and st.group(1) == "reviewed":  # 사이트에 나가는 것만 링크
             out[m.group(1).strip()] = "/notes/%s/" % md.stem
     return out
 

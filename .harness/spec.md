@@ -4,6 +4,7 @@
 읽고 정리한 논문 67편을 **요약 카드 + 원문 링크**만으로 외부에 공개하는 정적 사이트. 정본은 `data/papers.json` 하나이고 사이트(`site/index.html`)는 그 파생물이다(I3). 완성은 (1) 내부 맥락이 섞여 잘린 요약이 전부 공개용으로 다시 쓰이고, (2) 학회·연도가 정규화되어 필터가 깨끗하고, (3) 검증기가 통과한 상태다.
 
 ## 도메인 지시문
+- **노트 양식은 `docs/NOTE-TEMPLATE.md`.** 밤은 `notes/` 의 status: draft 노트만 채운다. status 를 reviewed 로 바꾸지 않는다(사람 몫). 본보기는 `notes/mooncake.md`.
 - **공개 원칙은 `docs/PRINCIPLES.md` 7개.** 제목 영어 · 본문 한국어 요약(8,000자 상한) · 그림은 CC 라이선스일 때만 그대로(아니면 다시 그림) · 결과 그래프 금지 · 내부 맥락 금지 · 링크 지어내기 금지 · raw 반출 금지. 검증기가 거부한다(`scripts/rules.py`, `scripts/papers.py`).
 - **밤은 네트워크가 없다.** 원본 재추출(`scripts/pull`)·미러(`scripts/mirror`)는 사람이 대화형에서 돌린다. 밤은 `data/papers.json` 과 `site/` 만 고친다.
 - `data/raw/` 는 읽기 참고용이다. 그 안의 문장을 공개 필드로 옮길 때 사적 프로젝트·"우리" 언급은 절대 옮기지 않는다 — `scripts/papers.py --validate` 가 거부한다. 금지 문구의 정본은 `data/raw/internal-terms.txt`(git 제외)이고, 코드에는 일반 규칙(사설 IP·🔑·"이 스터디"·편집 문장의 "우리")만 있다.
